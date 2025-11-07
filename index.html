@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Snake Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -31,7 +31,8 @@
                 </div>
                 <div id="restart-tab" class="tab-content active">
                     <h2>Game Over!</h2>
-                    <p>Press an arrow key to start</p>
+                    <p class="desktop-text">Press an arrow key to start</p>
+                    <p class="mobile-text">Tap a direction to start</p>
                 </div>
                 <div id="highscores-tab" class="tab-content">
                     <h2>High Scores</h2>
@@ -39,10 +40,23 @@
                 </div>
             </div>
             <div id="start-prompt" class="start-prompt">
-                <p>Press an arrow key to start</p>
+                <p class="desktop-text">Press an arrow key to start</p>
+                <p class="mobile-text">Tap a direction to start</p>
             </div>
             <div class="instructions">
-                <p>Use arrow keys to control the snake</p>
+                <p class="desktop-text">Use arrow keys to control the snake</p>
+                <p class="mobile-text">Use the directional buttons or swipe to control</p>
+            </div>
+            <!-- Mobile touch controls -->
+            <div class="mobile-controls">
+                <div class="control-row">
+                    <button class="control-btn" data-direction="up" aria-label="Up">↑</button>
+                </div>
+                <div class="control-row">
+                    <button class="control-btn" data-direction="left" aria-label="Left">←</button>
+                    <button class="control-btn" data-direction="down" aria-label="Down">↓</button>
+                    <button class="control-btn" data-direction="right" aria-label="Right">→</button>
+                </div>
             </div>
         </div>
     </div>

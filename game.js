@@ -23,6 +23,13 @@ function init() {
     canvas = document.getElementById('gameCanvas');
     ctx = canvas.getContext('2d');
     
+    // Make canvas responsive
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(resizeCanvas, 100);
+    });
+    
     // Load high scores from localStorage
     loadHighScores();
     updateHighScoreDisplay();
@@ -33,11 +40,152 @@ function init() {
     // Event listeners
     document.addEventListener('keydown', handleKeyPress);
     
+    // Mobile touch controls
+    setupTouchControls();
+    
     // Tab switching
     setupTabs();
     
     // Start game loop
     startGame();
+}
+
+// Make canvas responsive
+function resizeCanvas() {
+    const container = canvas.parentElement;
+    const maxWidth = Math.min(400, window.innerWidth - 40);
+    const maxHeight = Math.min(400, window.innerHeight * 0.5);
+    const size = Math.min(maxWidth, maxHeight);
+    
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+}
+
+// Swipe gesture variables
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+// Setup touch controls
+function setupTouchControls() {
+    // Button controls
+    const controlButtons = document.querySelectorAll('.control-btn');
+    controlButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const direction = btn.getAttribute('data-direction');
+            handleDirectionInput(direction);
+        });
+        
+        // Touch events for better mobile support
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            btn.classList.add('active');
+        });
+        
+        btn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            btn.classList.remove('active');
+            const direction = btn.getAttribute('data-direction');
+            handleDirectionInput(direction);
+        });
+    });
+    
+    // Swipe gesture detection on canvas
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: false });
+    
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    }, { passive: false });
+}
+
+// Handle swipe gestures
+function handleSwipe() {
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const minSwipeDistance = 30;
+    
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (Math.abs(deltaX) > minSwipeDistance) {
+            if (deltaX > 0) {
+                handleDirectionInput('right');
+            } else {
+                handleDirectionInput('left');
+            }
+        }
+    } else {
+        // Vertical swipe
+        if (Math.abs(deltaY) > minSwipeDistance) {
+            if (deltaY > 0) {
+                handleDirectionInput('down');
+            } else {
+                handleDirectionInput('up');
+            }
+        }
+    }
+}
+
+// Handle direction input (works for both keyboard and touch)
+function handleDirectionInput(dir) {
+    let key;
+    switch(dir) {
+        case 'up':
+            key = 'ArrowUp';
+            break;
+        case 'down':
+            key = 'ArrowDown';
+            break;
+        case 'left':
+            key = 'ArrowLeft';
+            break;
+        case 'right':
+            key = 'ArrowRight';
+            break;
+        default:
+            return;
+    }
+    
+    // Check if game-over overlay is visible
+    const gameOverElement = document.getElementById('game-over');
+    const isGameOverVisible = !gameOverElement.classList.contains('hidden');
+    
+    // If game is not running and not started (initial start), wait for direction input
+    if (!gameRunning && !gameStarted && !isGameOverVisible) {
+        // Prevent down arrow as initial direction
+        if (key === 'ArrowDown') {
+            return;
+        }
+        startNewGame(key);
+        return;
+    }
+    
+    // If game is not running or not started, ignore
+    if (!gameRunning || !gameStarted) return;
+    
+    // Prevent reversing into itself
+    switch(key) {
+        case 'ArrowUp':
+            if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+            break;
+        case 'ArrowDown':
+            if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+            break;
+        case 'ArrowLeft':
+            if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+            break;
+        case 'ArrowRight':
+            if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+            break;
+    }
 }
 
 // Setup tab switching
@@ -143,39 +291,23 @@ function handleKeyPress(e) {
     const isArrowKey = e.key === 'ArrowUp' || e.key === 'ArrowDown' || 
                        e.key === 'ArrowLeft' || e.key === 'ArrowRight';
     
-    // Check if game-over overlay is visible (game was lost)
-    const gameOverElement = document.getElementById('game-over');
-    const isGameOverVisible = !gameOverElement.classList.contains('hidden');
-    
-    // If game is not running and not started (initial start), wait for direction input
-    // But don't allow arrow keys if game-over overlay is visible (must click restart button first)
-    if (!gameRunning && !gameStarted && isArrowKey && !isGameOverVisible) {
-        // Prevent down arrow as initial direction (would cause immediate collision)
-        if (e.key === 'ArrowDown') {
-            return; // Ignore down arrow on initial start
+    if (isArrowKey) {
+        let dir;
+        switch(e.key) {
+            case 'ArrowUp':
+                dir = 'up';
+                break;
+            case 'ArrowDown':
+                dir = 'down';
+                break;
+            case 'ArrowLeft':
+                dir = 'left';
+                break;
+            case 'ArrowRight':
+                dir = 'right';
+                break;
         }
-        // Start with the direction
-        startNewGame(e.key);
-        return;
-    }
-    
-    // If game is not running or not started, ignore other keys
-    if (!gameRunning || !gameStarted) return;
-    
-    // Prevent reversing into itself
-    switch(e.key) {
-        case 'ArrowUp':
-            if (direction.y === 0) nextDirection = { x: 0, y: -1 };
-            break;
-        case 'ArrowDown':
-            if (direction.y === 0) nextDirection = { x: 0, y: 1 };
-            break;
-        case 'ArrowLeft':
-            if (direction.x === 0) nextDirection = { x: -1, y: 0 };
-            break;
-        case 'ArrowRight':
-            if (direction.x === 0) nextDirection = { x: 1, y: 0 };
-            break;
+        handleDirectionInput(dir);
     }
 }
 
@@ -277,6 +409,14 @@ function render() {
     // Clear canvas
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    // Ensure canvas maintains proper aspect ratio
+    const displayWidth = canvas.clientWidth;
+    const displayHeight = canvas.clientHeight;
+    if (canvas.width !== CANVAS_WIDTH || canvas.height !== CANVAS_HEIGHT) {
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+    }
     
     // Draw grid (optional, for visual aid)
     ctx.strokeStyle = '#16213e';
