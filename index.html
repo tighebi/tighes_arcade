@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Snake Game</title>
+    <title>Tighe's Arcade - Retro Classics</title>
+    <link rel="stylesheet" href="shared/styles.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="hub-page">
     <div id="animated-bg">
         <div class="bg-layer bg-pattern-1" id="pattern1"></div>
         <div class="bg-layer bg-pattern-2" id="pattern2"></div>
@@ -14,101 +15,40 @@
         <div class="bg-layer bg-particles"></div>
         <div class="mouse-follower" id="mouseFollower"></div>
     </div>
-    <!-- Main Menu -->
-    <div id="main-menu" class="menu-screen">
-        <div class="menu-content">
-            <h1>Snake Game</h1>
-            <div class="menu-section">
-                <h2>Select Game Mode</h2>
-                <div class="mode-selection">
-                    <button class="menu-btn" data-mode="classic">Classic</button>
-                    <button class="menu-btn" data-mode="zen">Zen Mode</button>
-                    <button class="menu-btn" data-mode="powerup">Power-Up</button>
-                </div>
-            </div>
-            <div class="menu-section">
-                <h2>Customization</h2>
-                <div class="customization-section">
-                    <div class="customization-group">
-                        <label>Skin:</label>
-                        <select id="skin-selector" tabindex="0">
-                            <option value="classic">Classic</option>
-                            <option value="rainbow">Rainbow</option>
-                            <option value="robot">Robot</option>
-                        </select>
-                    </div>
-                    <div class="customization-group">
-                        <label>Theme:</label>
-                        <select id="theme-selector" tabindex="0">
-                            <option value="default">Default</option>
-                            <option value="night">Night Mode</option>
-                            <option value="garden">Garden</option>
-                            <option value="space">Space</option>
-                            <option value="retro">Retro LCD</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+    
+    <div class="game-hub">
+        <div class="hub-header">
+            <h1>🎮 Tighe's Arcade</h1>
+            <p>Classic Retro Games - Play, Compete, and Set High Scores!</p>
+        </div>
+        
+        <div class="games-grid">
+            <a href="games/snake.html" class="game-card">
+                <div class="game-card-icon">🐍</div>
+                <h2>Snake</h2>
+                <p>Classic snake game with multiple modes: Classic, Zen, and Power-Up. Grow as long as you can!</p>
+            </a>
+            
+            <a href="games/breakout.html" class="game-card">
+                <div class="game-card-icon">🧱</div>
+                <h2>Breakout</h2>
+                <p>Break all the bricks! Use your paddle to bounce the ball and clear the board.</p>
+            </a>
+            
+            <a href="games/flappy.html" class="game-card">
+                <div class="game-card-icon">🐦</div>
+                <h2>Flappy Bird</h2>
+                <p>Tap to fly! Navigate through obstacles and see how far you can go.</p>
+            </a>
+            
+            <a href="games/2048.html" class="game-card">
+                <div class="game-card-icon">🔢</div>
+                <h2>2048</h2>
+                <p>Slide tiles to combine numbers. Can you reach 2048?</p>
+            </a>
         </div>
     </div>
-
-    <!-- Game Container (hidden initially) -->
-    <div class="game-container hidden">
-        <div class="game-header">
-            <h1>Snake Game</h1>
-            <div class="score-container">
-                <span>Score: <span id="score">0</span></span>
-                <span id="high-score-container">High Score: <span id="high-score">0</span></span>
-            </div>
-        </div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div class="game-controls">
-            <!-- Pause Menu -->
-            <div id="pause-menu" class="pause-menu hidden">
-                <h2 id="pause-title">Ready to Play</h2>
-                <p id="pause-instructions" class="pause-instructions">Press an arrow key or click Play to start</p>
-                <button class="menu-btn" id="resume-btn">Play</button>
-                <button class="menu-btn" id="back-to-menu-btn">Back to Menu</button>
-            </div>
-            <!-- Game Over Menu -->
-            <div id="game-over" class="game-over hidden">
-                <div class="game-over-tabs">
-                    <button class="tab-button active" data-tab="restart">Restart</button>
-                    <button class="tab-button" data-tab="highscores" id="highscores-tab-btn">High Scores</button>
-                </div>
-                <div id="restart-tab" class="tab-content active">
-                    <h2>Game Over!</h2>
-                    <p>Final Score: <span id="final-score">0</span></p>
-                    <button class="menu-btn" id="play-again-btn">Play Again</button>
-                    <button class="menu-btn" id="menu-from-gameover-btn">Back to Menu</button>
-                </div>
-                <div id="highscores-tab" class="tab-content">
-                    <h2 id="highscores-title">High Scores</h2>
-                    <div id="high-scores-list"></div>
-                </div>
-                <div id="powerup-highscores-tab" class="tab-content">
-                    <h2>Power-Up High Scores</h2>
-                    <div id="powerup-high-scores-list"></div>
-                </div>
-            </div>
-            <div class="instructions">
-                <p class="desktop-text">Press SPACE to pause | Use arrow keys to control</p>
-                <p class="mobile-text">Tap the pause button or use directional controls</p>
-            </div>
-            <!-- Mobile touch controls -->
-            <div class="mobile-controls">
-                <button class="pause-btn" id="mobile-pause-btn">⏸ Pause</button>
-                <div class="control-row">
-                    <button class="control-btn" data-direction="up" aria-label="Up">↑</button>
-                </div>
-                <div class="control-row">
-                    <button class="control-btn" data-direction="left" aria-label="Left">←</button>
-                    <button class="control-btn" data-direction="down" aria-label="Down">↓</button>
-                    <button class="control-btn" data-direction="right" aria-label="Right">→</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-section">
@@ -127,15 +67,8 @@
             </div>
         </div>
     </footer>
-    <script src="config.js"></script>
-    <script src="storage.js"></script>
-    <script src="skins.js"></script>
-    <script src="renderer.js"></script>
-    <script src="game-logic.js"></script>
-    <script src="controls.js"></script>
-    <script src="menu.js"></script>
-    <script src="game.js"></script>
+    
+    <script src="shared/nav.js"></script>
     <script src="background.js"></script>
 </body>
 </html>
-

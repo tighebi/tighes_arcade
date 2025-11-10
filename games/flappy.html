@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Bird - Tighe's Arcade</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body class="game-page">
+    <div id="animated-bg">
+        <div class="bg-layer bg-pattern-1" id="pattern1"></div>
+        <div class="bg-layer bg-pattern-2" id="pattern2"></div>
+        <div class="bg-layer bg-gradient"></div>
+        <div class="bg-layer bg-particles"></div>
+        <div class="mouse-follower" id="mouseFollower"></div>
+    </div>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <h1>Flappy Bird</h1>
+            <div class="score-container">
+                <span>Score: <span id="score">0</span></span>
+                <span>High Score: <span id="high-score">0</span></span>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        <div class="game-controls">
+            <div id="game-over" class="game-over hidden">
+                <h2>Game Over!</h2>
+                <p>Final Score: <span id="final-score">0</span></p>
+                <button class="menu-btn" id="play-again-btn">Play Again</button>
+                <button class="menu-btn" id="back-to-menu-btn">Back to Arcade</button>
+            </div>
+            <div id="start-prompt" class="start-prompt">
+                <p>Click or press SPACE to start</p>
+            </div>
+            <div class="instructions">
+                <p class="desktop-text">Click or press SPACE to flap | Avoid the pipes!</p>
+                <p class="mobile-text">Tap to flap | Avoid the pipes!</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <p class="footer-text">Questions or concerns?</p>
+                <a href="mailto:tigheb@bu.edu" class="footer-link">tigheb@bu.edu</a>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-section">
+                <p class="footer-credit">Made by <span class="footer-name">Tighe Billings</span></p>
+                <p class="footer-copyright">© 2025 All rights reserved</p>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-section">
+                <p class="footer-sponsor">Sponsored by</p>
+                <p class="footer-sponsor-name">Boston University</p>
+            </div>
+        </div>
+    </footer>
+    <script src="../shared/storage.js"></script>
+    <script src="flappy.js"></script>
+    <script src="../background.js"></script>
+    <script src="../shared/nav.js"></script>
+</body>
+</html>
+

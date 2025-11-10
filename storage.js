@@ -1,7 +1,12 @@
 // localStorage management for high scores and preferences
+// Integrates with ArcadeStorage for unified high score system
 const Storage = {
-    // High scores
+    // High scores (legacy support + ArcadeStorage integration)
     loadHighScores() {
+        // Try ArcadeStorage first, then fallback to legacy
+        if (typeof ArcadeStorage !== 'undefined') {
+            return ArcadeStorage.loadHighScores(ArcadeStorage.GAMES.SNAKE_CLASSIC);
+        }
         const saved = localStorage.getItem('snakeHighScores');
         return saved ? JSON.parse(saved).sort((a, b) => b - a) : [];
     },
@@ -11,6 +16,10 @@ const Storage = {
     },
     
     loadPowerUpHighScores() {
+        // Try ArcadeStorage first, then fallback to legacy
+        if (typeof ArcadeStorage !== 'undefined') {
+            return ArcadeStorage.loadHighScores(ArcadeStorage.GAMES.SNAKE_POWERUP);
+        }
         const saved = localStorage.getItem('snakePowerUpHighScores');
         return saved ? JSON.parse(saved).sort((a, b) => b - a) : [];
     },
@@ -37,6 +46,7 @@ const Storage = {
     },
     
     // Update high scores (adds new score if high enough, keeps top 10)
+    // Also saves to ArcadeStorage if available
     updateHighScores(newScore, isPowerUp = false) {
         const key = isPowerUp ? 'snakePowerUpHighScores' : 'snakeHighScores';
         const loadFunc = isPowerUp ? this.loadPowerUpHighScores : this.loadHighScores;
@@ -49,6 +59,14 @@ const Storage = {
             scores.sort((a, b) => b - a);
             scores = scores.slice(0, 10);
             saveFunc.call(this, scores);
+            
+            // Also save to ArcadeStorage if available
+            if (typeof ArcadeStorage !== 'undefined') {
+                const gameId = isPowerUp 
+                    ? ArcadeStorage.GAMES.SNAKE_POWERUP 
+                    : ArcadeStorage.GAMES.SNAKE_CLASSIC;
+                ArcadeStorage.saveHighScore(gameId, newScore);
+            }
         }
         
         return scores;

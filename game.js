@@ -50,10 +50,25 @@ function init() {
     // Apply theme
     applyTheme(gameState.currentTheme);
     
-    // Load high scores
+    // Load high scores (from unified storage)
     gameState.highScores = Storage.loadHighScores();
     gameState.powerUpHighScores = Storage.loadPowerUpHighScores();
     gameState.highScore = gameState.highScores.length > 0 ? gameState.highScores[0] : 0;
+    
+    // Migrate to unified storage if ArcadeStorage is available
+    if (typeof ArcadeStorage !== 'undefined') {
+        // Ensure scores are synced with ArcadeStorage
+        if (gameState.highScores.length > 0) {
+            gameState.highScores.forEach(score => {
+                ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.SNAKE_CLASSIC, score);
+            });
+        }
+        if (gameState.powerUpHighScores.length > 0) {
+            gameState.powerUpHighScores.forEach(score => {
+                ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.SNAKE_POWERUP, score);
+            });
+        }
+    }
     
     // Setup canvas responsiveness
     resizeCanvas();

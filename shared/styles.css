@@ -1,0 +1,176 @@
+/* Shared styles for arcade site */
+
+/* Navigation Bar */
+.main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid rgba(118, 75, 162, 0.5);
+    z-index: 1000;
+    padding: 15px 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.nav-logo {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #4ecdc4;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-logo:hover {
+    color: #6ef0f0;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background: rgba(118, 75, 162, 0.3);
+    color: #4ecdc4;
+}
+
+.nav-link.active {
+    background: rgba(118, 75, 162, 0.5);
+    color: #4ecdc4;
+}
+
+/* Adjust body padding for fixed nav */
+body {
+    padding-top: 70px;
+}
+
+/* Homepage hub padding */
+.game-hub {
+    padding-top: 20px;
+}
+
+/* Hall of fame padding */
+.hall-of-fame {
+    padding-top: 20px;
+}
+
+/* Game Hub Styles */
+.game-hub {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.hub-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.hub-header h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hub-header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.game-card {
+    background: linear-gradient(135deg, rgba(118, 75, 162, 0.3) 0%, rgba(102, 126, 234, 0.3) 100%);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(118, 75, 162, 0.5);
+    border-color: #4ecdc4;
+}
+
+.game-card-icon {
+    font-size: 4em;
+    margin-bottom: 15px;
+}
+
+.game-card h2 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    color: #4ecdc4;
+}
+
+.game-card p {
+    font-size: 1em;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+/* Mobile responsive navigation */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-links {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .nav-link {
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+    
+    body {
+        padding-top: 100px;
+    }
+    
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .hub-header h1 {
+        font-size: 2em;
+    }
+}
+

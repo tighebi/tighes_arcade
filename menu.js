@@ -97,7 +97,12 @@ const Menu = {
         
         if (this.elements.backToMenuBtn) {
             this.elements.backToMenuBtn.addEventListener('click', () => {
-                if (callbacks.onBackToMenu) callbacks.onBackToMenu();
+                // Check if we're in a game subdirectory (arcade mode)
+                if (window.location.pathname.includes('/games/')) {
+                    window.location.href = '../index.html';
+                } else if (callbacks.onBackToMenu) {
+                    callbacks.onBackToMenu();
+                }
             });
         }
         
@@ -118,7 +123,12 @@ const Menu = {
         
         if (this.elements.menuFromGameOverBtn) {
             this.elements.menuFromGameOverBtn.addEventListener('click', () => {
-                if (callbacks.onBackToMenu) callbacks.onBackToMenu();
+                // Check if we're in a game subdirectory (arcade mode)
+                if (window.location.pathname.includes('/games/')) {
+                    window.location.href = '../index.html';
+                } else if (callbacks.onBackToMenu) {
+                    callbacks.onBackToMenu();
+                }
             });
         }
     },

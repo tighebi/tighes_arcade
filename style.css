@@ -6,14 +6,25 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
     background: #0a0a1a;
     color: #fff;
     position: relative;
+    min-height: 100vh;
+}
+
+/* Default: game pages use flexbox for centering */
+body.game-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
+}
+
+/* Hub and hall of fame pages use normal flow */
+body.hub-page,
+body.hall-page {
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Animated background - fixed to cover entire viewport */
