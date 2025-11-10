@@ -15,35 +15,35 @@ const THEMES = {
     default: {
         bgColor: '#1a1a2e',
         gridColor: '#16213e',
-        foodColor: '#ff6b6b',
+        foodColor: '#ff4757', // Bright red - contrasts with cyan/teal snake
         headColor: '#4ecdc4',
         bodyColor: '#45b7b8'
     },
     night: {
         bgColor: '#0a0a1a',
         gridColor: '#1a1a3a',
-        foodColor: '#ff6b6b',
+        foodColor: '#ffa502', // Bright orange-yellow - contrasts with purple snake
         headColor: '#6c5ce7',
         bodyColor: '#5f4dee'
     },
     garden: {
         bgColor: '#2d5016',
         gridColor: '#1a3009',
-        foodColor: '#ff6b6b',
+        foodColor: '#ff3838', // Bright red - contrasts with green snake
         headColor: '#51cf66',
         bodyColor: '#40c057'
     },
     space: {
         bgColor: '#000814',
         gridColor: '#001d3d',
-        foodColor: '#ff6b6b',
+        foodColor: '#ff6348', // Bright orange - contrasts with blue snake
         headColor: '#4a90e2',
         bodyColor: '#357abd'
     },
     retro: {
         bgColor: '#1e3a1e',
         gridColor: '#0f1f0f',
-        foodColor: '#00ff41',
+        foodColor: '#ff1493', // Bright pink/magenta - contrasts with green snake (was same color!)
         headColor: '#00ff41',
         bodyColor: '#00cc33'
     }

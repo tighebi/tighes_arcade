@@ -463,41 +463,261 @@ body.theme-retro .bg-particles {
     color: #fff;
 }
 
-.customization-group select {
+/* Base select styling - applies to all select elements */
+.customization-group select,
+#difficulty-selector,
+select {
     padding: 8px 12px;
-    background: rgba(26, 26, 46, 0.8);
-    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 6px;
-    color: #fff;
     font-size: 0.9em;
     cursor: pointer;
     transition: all 0.3s;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
     padding-right: 30px;
     min-width: 150px;
+    font-family: inherit;
+    /* Clean plain background */
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+    border: 2px solid rgba(200, 200, 200, 0.5);
 }
 
-.customization-group select:hover {
-    background-color: rgba(26, 26, 46, 0.9);
-    border-color: rgba(255, 255, 255, 0.5);
+.customization-group select:hover,
+#difficulty-selector:hover,
+select:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background-color: rgba(255, 255, 255, 1);
 }
 
-.customization-group select:focus {
+.customization-group select:focus,
+#difficulty-selector:focus,
+select:focus {
     outline: none;
-    border-color: #4ecdc4;
-    box-shadow: 0 0 8px rgba(78, 205, 196, 0.3);
-    background-color: rgba(26, 26, 46, 0.95);
+    background-color: rgba(255, 255, 255, 1);
 }
 
-.customization-group select option {
-    background: rgba(26, 26, 46, 0.95);
+/* Default theme (cyan/teal) */
+.customization-group select,
+#difficulty-selector,
+select {
+    border-color: #4ecdc4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234ecdc4' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+.customization-group select:hover,
+#difficulty-selector:hover,
+select:hover {
+    border-color: #45b7b8;
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+}
+
+.customization-group select:focus,
+#difficulty-selector:focus,
+select:focus {
+    border-color: #4ecdc4;
+    box-shadow: 0 0 8px rgba(78, 205, 196, 0.4);
+}
+
+.customization-group select option,
+#difficulty-selector option,
+select option {
+    background: rgba(26, 26, 46, 0.98);
     color: #fff;
-    padding: 8px;
+    padding: 10px;
+}
+
+.customization-group select option:hover,
+#difficulty-selector option:hover,
+select option:hover {
+    background: rgba(78, 205, 196, 0.3);
+}
+
+.customization-group select option:checked,
+#difficulty-selector option:checked,
+select option:checked {
+    background: #4ecdc4;
+    color: #1a1a2e;
+    font-weight: bold;
+}
+
+/* Night theme (purple) */
+body.theme-night .customization-group select,
+body.theme-night #difficulty-selector,
+body.theme-night select {
+    border-color: #6c5ce7;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236c5ce7' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+body.theme-night .customization-group select:hover,
+body.theme-night #difficulty-selector:hover,
+body.theme-night select:hover {
+    border-color: #5f4dee;
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
+}
+
+body.theme-night .customization-group select:focus,
+body.theme-night #difficulty-selector:focus,
+body.theme-night select:focus {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+}
+
+body.theme-night .customization-group select option,
+body.theme-night #difficulty-selector option,
+body.theme-night select option {
+    background: rgba(10, 10, 26, 0.98);
+    color: #fff;
+}
+
+body.theme-night .customization-group select option:hover,
+body.theme-night #difficulty-selector option:hover,
+body.theme-night select option:hover {
+    background: rgba(108, 92, 231, 0.3);
+}
+
+body.theme-night .customization-group select option:checked,
+body.theme-night #difficulty-selector option:checked,
+body.theme-night select option:checked {
+    background: #6c5ce7;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Garden theme (green) */
+body.theme-garden .customization-group select,
+body.theme-garden #difficulty-selector,
+body.theme-garden select {
+    border-color: #51cf66;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2351cf66' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+body.theme-garden .customization-group select:hover,
+body.theme-garden #difficulty-selector:hover,
+body.theme-garden select:hover {
+    border-color: #40c057;
+    box-shadow: 0 2px 8px rgba(81, 207, 102, 0.3);
+}
+
+body.theme-garden .customization-group select:focus,
+body.theme-garden #difficulty-selector:focus,
+body.theme-garden select:focus {
+    border-color: #51cf66;
+    box-shadow: 0 0 10px rgba(81, 207, 102, 0.5);
+}
+
+body.theme-garden .customization-group select option,
+body.theme-garden #difficulty-selector option,
+body.theme-garden select option {
+    background: rgba(45, 80, 22, 0.98);
+    color: #fff;
+}
+
+body.theme-garden .customization-group select option:hover,
+body.theme-garden #difficulty-selector option:hover,
+body.theme-garden select option:hover {
+    background: rgba(81, 207, 102, 0.3);
+}
+
+body.theme-garden .customization-group select option:checked,
+body.theme-garden #difficulty-selector option:checked,
+body.theme-garden select option:checked {
+    background: #51cf66;
+    color: #2d5016;
+    font-weight: bold;
+}
+
+/* Space theme (blue) */
+body.theme-space .customization-group select,
+body.theme-space #difficulty-selector,
+body.theme-space select {
+    border-color: #4a90e2;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a90e2' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+body.theme-space .customization-group select:hover,
+body.theme-space #difficulty-selector:hover,
+body.theme-space select:hover {
+    border-color: #357abd;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+}
+
+body.theme-space .customization-group select:focus,
+body.theme-space #difficulty-selector:focus,
+body.theme-space select:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+}
+
+body.theme-space .customization-group select option,
+body.theme-space #difficulty-selector option,
+body.theme-space select option {
+    background: rgba(0, 8, 20, 0.98);
+    color: #fff;
+}
+
+body.theme-space .customization-group select option:hover,
+body.theme-space #difficulty-selector option:hover,
+body.theme-space select option:hover {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+body.theme-space .customization-group select option:checked,
+body.theme-space #difficulty-selector option:checked,
+body.theme-space select option:checked {
+    background: #4a90e2;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Retro theme (green terminal) */
+body.theme-retro .customization-group select,
+body.theme-retro #difficulty-selector,
+body.theme-retro select {
+    border-color: #00ff41;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300ff41' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    box-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
+}
+
+body.theme-retro .customization-group select:hover,
+body.theme-retro #difficulty-selector:hover,
+body.theme-retro select:hover {
+    border-color: #00cc33;
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+}
+
+body.theme-retro .customization-group select:focus,
+body.theme-retro #difficulty-selector:focus,
+body.theme-retro select:focus {
+    border-color: #00ff41;
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
+}
+
+body.theme-retro .customization-group select option,
+body.theme-retro #difficulty-selector option,
+body.theme-retro select option {
+    background: rgba(30, 58, 30, 0.98);
+    color: #00ff41;
+}
+
+body.theme-retro .customization-group select option:hover,
+body.theme-retro #difficulty-selector option:hover,
+body.theme-retro select option:hover {
+    background: rgba(0, 255, 65, 0.2);
+    color: #00ff88;
+}
+
+body.theme-retro .customization-group select option:checked,
+body.theme-retro #difficulty-selector option:checked,
+body.theme-retro select option:checked {
+    background: #00ff41;
+    color: #1e3a1e;
+    font-weight: bold;
+    box-shadow: 0 0 5px rgba(0, 255, 65, 0.8);
 }
 
 /* Disable select when game is running */
