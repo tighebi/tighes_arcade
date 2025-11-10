@@ -102,27 +102,27 @@ Change the game's visual style and background:
 - Score tracking with high scores
 
 ### Controls
-- **Mouse** - Move paddle with mouse
+- **Mouse** - Move paddle with mouse (properly aligned on all screen sizes)
 - **Arrow Keys / WASD** - Move paddle left/right
-- **Touch** - Touch and drag on mobile
+- **Touch** - Touch and drag on mobile (paddle aligns precisely with finger position)
 - **SPACE** - Launch ball (when stopped)
 
 ## 🐦 Flappy Bird Game Details
 
 ### Features
+- **Easier starting difficulty** - Faster jumping, thinner pipes, bigger gaps
 - Progressive speed increase as you play longer
-- Starts faster than classic Flappy Bird
 - Smooth bird physics
 - Pipe obstacles with gaps
 - Score tracking
 - High score system
 
 ### Gameplay
-- **Click/Tap/SPACE** - Make the bird flap
-- Navigate through pipes
+- **Click/Tap/SPACE** - Make the bird flap (faster jump for easier control)
+- Navigate through pipes (thinner pipes with bigger gaps for easier navigation)
 - Score increases as you pass pipes
-- Speed gradually increases for added challenge
-- Game gets progressively more difficult
+- Speed gradually increases for added challenge as the game progresses
+- Game starts easier but gets progressively more difficult
 
 ### Visuals
 - Clean, retro-style graphics
@@ -174,6 +174,8 @@ Change the game's visual style and background:
 - Touch controls for all games
 - Adaptive layouts
 - Mobile-optimized interfaces
+- **Snake game** - Optimized canvas sizing on mobile to ensure all UI elements fit on screen
+- **Breakout game** - Precise touch/mouse alignment with paddle on all devices
 
 ### Consistent Theming
 - Unified visual style across all games
@@ -309,10 +311,11 @@ snake_game/
 - Watch ball speed increase as levels progress
 
 ### Flappy Bird
-- Start fast and get faster - be prepared!
-- Time your taps carefully
-- Focus on the gap, not the pipes
-- Speed increases gradually - stay focused
+- **Easier start** - Game begins with easier difficulty (bigger gaps, thinner pipes, faster jump)
+- Time your taps carefully - faster jump strength makes control easier
+- Focus on the gap, not the pipes - bigger gaps give you more room
+- Speed increases gradually as you progress - stay focused as difficulty ramps up
+- Take advantage of the easier beginning to build up your score
 
 ### 2048
 - Keep your highest tile in a corner
@@ -322,7 +325,24 @@ snake_game/
 
 ## 📝 Changelog
 
-### Version 3.1 (Current) - Performance & Polish Update
+### Version 3.2 (Current) - Mobile & Gameplay Improvements
+- **Flappy Bird Improvements**:
+  - Easier starting difficulty - faster jump strength (-11 vs -8)
+  - Thinner pipes (45px vs 60px) for easier navigation
+  - Bigger pipe gaps (180px vs 150px) for more room
+  - Slower initial speed (2.5 vs 3.5) for easier beginning
+  - Increased speed progression rate to maintain challenge as game progresses
+- **Breakout Mobile Fixes**:
+  - Fixed paddle alignment with finger/touch position on mobile
+  - Proper canvas coordinate scaling for accurate touch tracking
+  - Mouse controls also account for canvas scaling on all devices
+  - Added touchstart handler for immediate paddle response
+- **Snake Mobile Optimizations**:
+  - Reduced canvas size on mobile (max 350px, min 280px) to ensure all UI elements fit
+  - More conservative height calculations to prevent UI overflow
+  - Better space allocation for header, score, controls, and mobile controls
+
+### Version 3.1 - Performance & Polish Update
 - **Performance Optimizations**:
   - Batched rendering for Snake game - handles long snakes (100+ segments) smoothly
   - Background animation throttled to 30 FPS and paused when page hidden

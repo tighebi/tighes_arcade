@@ -158,10 +158,12 @@ const BreakoutGame = {
         let mouseX = 0;
         let keys = { left: false, right: false };
         
-        // Mouse controls
+        // Mouse controls - account for canvas scaling
         this.canvas.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
+            // Calculate actual canvas coordinates accounting for scaling
+            const scaleX = this.canvas.width / rect.width;
+            mouseX = (e.clientX - rect.left) * scaleX;
             if (this.gameRunning) {
                 this.paddle.x = mouseX - this.paddle.width / 2;
                 this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
@@ -182,14 +184,36 @@ const BreakoutGame = {
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
         });
         
-        // Touch controls
+        // Touch controls - properly account for canvas scaling on mobile
         this.canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const rect = this.canvas.getBoundingClientRect();
             const touch = e.touches[0];
-            mouseX = touch.clientX - rect.left;
+            
+            // Calculate actual canvas coordinates accounting for scaling
+            const scaleX = this.canvas.width / rect.width;
+            
+            // Get touch position relative to canvas
+            const touchX = (touch.clientX - rect.left) * scaleX;
+            
             if (this.gameRunning) {
-                this.paddle.x = mouseX - this.paddle.width / 2;
+                // Center paddle on touch position
+                this.paddle.x = touchX - this.paddle.width / 2;
+                this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
+            }
+        });
+        
+        // Also handle touchstart for immediate response
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = this.canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            
+            const scaleX = this.canvas.width / rect.width;
+            const touchX = (touch.clientX - rect.left) * scaleX;
+            
+            if (this.gameRunning) {
+                this.paddle.x = touchX - this.paddle.width / 2;
                 this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
             }
         });

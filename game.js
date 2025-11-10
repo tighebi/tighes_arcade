@@ -180,7 +180,7 @@ function applyTheme(theme) {
     }
 }
 
-// Resize canvas
+// Resize canvas - optimized for mobile to ensure everything fits on screen
 function resizeCanvas() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return;
@@ -188,9 +188,13 @@ function resizeCanvas() {
     const isMobile = window.innerWidth <= 768;
     
     if (isMobile) {
-        const maxWidth = Math.min(400, window.innerWidth - 30);
-        const maxHeight = Math.min(400, (window.innerHeight - 350) * 0.9);
-        const size = Math.min(maxWidth, maxHeight);
+        // Reduced size on mobile to ensure all UI elements fit on screen
+        // Account for header, score, controls, and mobile controls
+        const availableHeight = window.innerHeight - 400; // More conservative estimate
+        const availableWidth = window.innerWidth - 40; // Account for padding
+        const maxSize = Math.min(availableWidth, availableHeight, 350); // Max 350px on mobile
+        const size = Math.max(280, maxSize); // Minimum 280px, but prefer smaller
+        
         canvas.style.width = size + 'px';
         canvas.style.height = size + 'px';
     } else {

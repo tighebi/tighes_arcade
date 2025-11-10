@@ -2,20 +2,20 @@
 const FlappyGame = {
     canvas: null,
     ctx: null,
-    bird: { x: 100, y: 250, width: 30, height: 30, velocity: 0, gravity: 0.5, jumpStrength: -8 },
+    bird: { x: 100, y: 250, width: 30, height: 30, velocity: 0, gravity: 0.5, jumpStrength: -11 }, // Faster jump
     pipes: [],
     score: 0,
     highScore: 0,
     gameRunning: false,
     gameStarted: false,
     animationId: null,
-    pipeWidth: 60,
-    pipeGap: 150,
-    pipeSpeed: 3.5, // Start faster
-    basePipeSpeed: 3.5,
+    pipeWidth: 45, // Thinner pipes (was 60)
+    pipeGap: 180, // Bigger gap (was 150)
+    pipeSpeed: 2.5, // Start slower for easier beginning
+    basePipeSpeed: 2.5,
     pipeSpawnRate: 120,
     frameCount: 0,
-    speedIncreaseRate: 0.002, // Speed increases over time
+    speedIncreaseRate: 0.003, // Speed increases faster over time to compensate for easier start
     
     init() {
         this.canvas = document.getElementById('gameCanvas');
