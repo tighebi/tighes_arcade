@@ -83,35 +83,6 @@
             opacity: 0.7;
             padding: 20px;
         }
-        .username-display {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .username-display span {
-            font-size: 1.2em;
-            color: #4ecdc4;
-            font-weight: bold;
-        }
-        .change-username-btn {
-            padding: 8px 16px;
-            background: rgba(78, 205, 196, 0.2);
-            border: 2px solid #4ecdc4;
-            border-radius: 5px;
-            color: #4ecdc4;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .change-username-btn:hover {
-            background: rgba(78, 205, 196, 0.3);
-            border-color: #6ef0f0;
-            transform: translateY(-2px);
-        }
         @media (max-width: 768px) {
             .scores-grid {
                 grid-template-columns: 1fr;
@@ -135,10 +106,6 @@
         <div class="hall-header">
             <h1>🏆 Hall of Fame</h1>
             <p>Your Personal Best Scores Across All Games</p>
-            <div class="username-display">
-                <span id="current-username-display">Player</span>
-                <button id="change-username-btn" class="change-username-btn">Change Username</button>
-            </div>
         </div>
         
         <div class="scores-grid" id="scores-grid">
@@ -200,34 +167,8 @@
             }).join('');
         }
         
-        // Update username display
-        function updateUsernameDisplay() {
-            if (typeof UsernameManager !== 'undefined') {
-                const usernameDisplay = document.getElementById('current-username-display');
-                if (usernameDisplay) {
-                    usernameDisplay.textContent = UsernameManager.getUsername();
-                }
-            }
-        }
-        
-        // Setup change username button
-        function setupUsernameChange() {
-            const changeBtn = document.getElementById('change-username-btn');
-            if (changeBtn && typeof UsernameManager !== 'undefined') {
-                changeBtn.addEventListener('click', () => {
-                    UsernameManager.showUsernameModal((username) => {
-                        updateUsernameDisplay();
-                        // Refresh the hall of fame display to show updated username
-                        displayHallOfFame();
-                    });
-                });
-            }
-        }
-        
         window.addEventListener('load', () => {
             displayHallOfFame();
-            updateUsernameDisplay();
-            setupUsernameChange();
         });
     </script>
 </body>

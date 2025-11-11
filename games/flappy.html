@@ -23,20 +23,54 @@
                 <span>Score: <span id="score">0</span></span>
                 <span>High Score: <span id="high-score">0</span></span>
             </div>
+            <div style="margin-top: 10px;">
+                <label for="difficulty-selector" style="margin-right: 10px; color: #fff; font-weight: bold;">Difficulty:</label>
+                <select id="difficulty-selector">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
         </div>
         <canvas id="gameCanvas" width="400" height="600"></canvas>
         <div class="game-controls">
-            <div id="game-over" class="game-over hidden">
-                <h2>Game Over!</h2>
-                <p>Final Score: <span id="final-score">0</span></p>
-                <button class="menu-btn" id="play-again-btn">Play Again</button>
+            <!-- Pause Menu -->
+            <div id="pause-menu" class="pause-menu hidden">
+                <h2 id="pause-title">Ready to Play</h2>
+                <p id="pause-instructions" class="pause-instructions">Click or press SPACE to start</p>
+                <button class="menu-btn" id="resume-btn">Play</button>
                 <button class="menu-btn" id="back-to-menu-btn">Back to Arcade</button>
             </div>
-            <div id="start-prompt" class="start-prompt">
-                <p>Click or press SPACE to start</p>
+            <!-- Game Over Menu -->
+            <div id="game-over" class="game-over hidden">
+                <div class="game-over-tabs">
+                    <button class="tab-button active" data-tab="restart">Restart</button>
+                    <button class="tab-button" data-tab="highscores" id="highscores-tab-btn">High Scores</button>
+                    <button class="tab-button" data-tab="leaderboard" id="leaderboard-tab-btn">Global Leaderboard</button>
+                </div>
+                <div id="restart-tab" class="tab-content active">
+                    <h2>Game Over!</h2>
+                    <p>Final Score: <span id="final-score">0</span></p>
+                    <div id="leaderboard-submit-section" class="leaderboard-submit-section hidden">
+                        <p id="submit-status" class="submit-status"></p>
+                        <button class="menu-btn" id="submit-score-btn">Submit Score to Leaderboard</button>
+                    </div>
+                    <button class="menu-btn" id="play-again-btn">Play Again</button>
+                    <button class="menu-btn" id="menu-from-gameover-btn">Back to Arcade</button>
+                </div>
+                <div id="highscores-tab" class="tab-content">
+                    <h2 id="highscores-title">High Scores</h2>
+                    <div id="high-scores-list"></div>
+                </div>
+                <div id="leaderboard-tab" class="tab-content">
+                    <h2 id="leaderboard-title">Global Leaderboard</h2>
+                    <div id="global-leaderboard-list" class="global-leaderboard-list">
+                        <p style="text-align: center; opacity: 0.7;">Loading leaderboard...</p>
+                    </div>
+                </div>
             </div>
             <div class="instructions">
-                <p class="desktop-text">Click or press SPACE to flap | Avoid the pipes!</p>
+                <p class="desktop-text">Click or press SPACE to flap | Avoid the pipes! | Press P to pause</p>
                 <p class="mobile-text">Tap to flap | Avoid the pipes!</p>
             </div>
         </div>
@@ -60,7 +94,12 @@
             </div>
         </div>
     </footer>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../shared/storage.js"></script>
+    <script src="../config.js"></script>
+    <script src="../leaderboard.js"></script>
+    <script src="../shared/username.js"></script>
     <script src="flappy.js"></script>
     <script src="../background.js"></script>
     <script src="../shared/nav.js"></script>

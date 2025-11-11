@@ -46,17 +46,63 @@
             z-index: 10;
             transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .tile-2 { background: #eee4da; }
-        .tile-4 { background: #ede0c8; }
-        .tile-8 { background: #f2b179; color: #f9f6f2; }
-        .tile-16 { background: #f59563; color: #f9f6f2; }
-        .tile-32 { background: #f67c5f; color: #f9f6f2; }
-        .tile-64 { background: #f65e3b; color: #f9f6f2; }
-        .tile-128 { background: #edcf72; color: #f9f6f2; font-size: 1.5em; }
-        .tile-256 { background: #edcc61; color: #f9f6f2; font-size: 1.5em; }
-        .tile-512 { background: #edc850; color: #f9f6f2; font-size: 1.5em; }
-        .tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 1.2em; }
-        .tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 1.2em; }
+        /* Default theme */
+        .theme-default .tile-2 { background: #eee4da; }
+        .theme-default .tile-4 { background: #ede0c8; }
+        .theme-default .tile-8 { background: #f2b179; color: #f9f6f2; }
+        .theme-default .tile-16 { background: #f59563; color: #f9f6f2; }
+        .theme-default .tile-32 { background: #f67c5f; color: #f9f6f2; }
+        .theme-default .tile-64 { background: #f65e3b; color: #f9f6f2; }
+        .theme-default .tile-128 { background: #edcf72; color: #f9f6f2; font-size: 1.5em; }
+        .theme-default .tile-256 { background: #edcc61; color: #f9f6f2; font-size: 1.5em; }
+        .theme-default .tile-512 { background: #edc850; color: #f9f6f2; font-size: 1.5em; }
+        .theme-default .tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 1.2em; }
+        .theme-default .tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 1.2em; }
+        
+        /* Dark theme */
+        .theme-dark .grid-container { background: #1a1a2e; }
+        .theme-dark .tile { background: #16213e; color: #fff; }
+        .theme-dark .tile-2 { background: #2d3748; }
+        .theme-dark .tile-4 { background: #4a5568; }
+        .theme-dark .tile-8 { background: #718096; }
+        .theme-dark .tile-16 { background: #90cdf4; color: #1a202c; }
+        .theme-dark .tile-32 { background: #63b3ed; color: #1a202c; }
+        .theme-dark .tile-64 { background: #4299e1; color: #fff; }
+        .theme-dark .tile-128 { background: #3182ce; color: #fff; font-size: 1.5em; }
+        .theme-dark .tile-256 { background: #2b6cb0; color: #fff; font-size: 1.5em; }
+        .theme-dark .tile-512 { background: #2c5282; color: #fff; font-size: 1.5em; }
+        .theme-dark .tile-1024 { background: #2a4365; color: #fff; font-size: 1.2em; }
+        .theme-dark .tile-2048 { background: #1e3a5f; color: #fff; font-size: 1.2em; }
+        
+        /* Colorful theme */
+        .theme-colorful .grid-container { background: #ff6b6b; }
+        .theme-colorful .tile { background: #fff; color: #333; }
+        .theme-colorful .tile-2 { background: #ffd93d; }
+        .theme-colorful .tile-4 { background: #ff6b9d; color: #fff; }
+        .theme-colorful .tile-8 { background: #c44569; color: #fff; }
+        .theme-colorful .tile-16 { background: #f8b500; }
+        .theme-colorful .tile-32 { background: #6c5ce7; color: #fff; }
+        .theme-colorful .tile-64 { background: #a29bfe; color: #fff; }
+        .theme-colorful .tile-128 { background: #00b894; color: #fff; font-size: 1.5em; }
+        .theme-colorful .tile-256 { background: #00cec9; color: #fff; font-size: 1.5em; }
+        .theme-colorful .tile-512 { background: #fd79a8; color: #fff; font-size: 1.5em; }
+        .theme-colorful .tile-1024 { background: #e17055; color: #fff; font-size: 1.2em; }
+        .theme-colorful .tile-2048 { background: #d63031; color: #fff; font-size: 1.2em; }
+        
+        /* Pastel theme */
+        .theme-pastel .grid-container { background: #f8f9fa; }
+        .theme-pastel .tile { background: #fff; color: #495057; }
+        .theme-pastel .tile-2 { background: #fff3cd; }
+        .theme-pastel .tile-4 { background: #f8d7da; }
+        .theme-pastel .tile-8 { background: #d1ecf1; }
+        .theme-pastel .tile-16 { background: #d4edda; }
+        .theme-pastel .tile-32 { background: #ffeaa7; }
+        .theme-pastel .tile-64 { background: #fab1a0; }
+        .theme-pastel .tile-128 { background: #a8e6cf; font-size: 1.5em; }
+        .theme-pastel .tile-256 { background: #ffd3a5; font-size: 1.5em; }
+        .theme-pastel .tile-512 { background: #c7ceea; font-size: 1.5em; }
+        .theme-pastel .tile-1024 { background: #ffaaa5; font-size: 1.2em; }
+        .theme-pastel .tile-2048 { background: #ff8b94; font-size: 1.2em; }
         .tile-new { 
             animation: tileSlideIn 0.2s ease-out;
         }
@@ -100,15 +146,53 @@
                 <span>Score: <span id="score">0</span></span>
                 <span>High Score: <span id="high-score">0</span></span>
             </div>
+            <div style="margin-top: 10px;">
+                <label for="theme-selector" style="margin-right: 10px; color: #fff; font-weight: bold;">Theme:</label>
+                <select id="theme-selector">
+                    <option value="default" selected>Default</option>
+                    <option value="dark">Dark</option>
+                    <option value="colorful">Colorful</option>
+                    <option value="pastel">Pastel</option>
+                </select>
+            </div>
         </div>
         <div id="game2048">
             <div class="grid-container" id="grid"></div>
             <div class="game-controls">
-                <div id="game-over" class="game-over hidden">
-                    <h2 id="game-over-title">Game Over!</h2>
-                    <p>Final Score: <span id="final-score">0</span></p>
-                    <button class="menu-btn" id="play-again-btn">Play Again</button>
+                <!-- Pause Menu -->
+                <div id="pause-menu" class="pause-menu hidden">
+                    <h2 id="pause-title">Ready to Play</h2>
+                    <p id="pause-instructions" class="pause-instructions">Use arrow keys or WASD to start</p>
+                    <button class="menu-btn" id="resume-btn">Play</button>
                     <button class="menu-btn" id="back-to-menu-btn">Back to Arcade</button>
+                </div>
+                <!-- Game Over Menu -->
+                <div id="game-over" class="game-over hidden">
+                    <div class="game-over-tabs">
+                        <button class="tab-button active" data-tab="restart">Restart</button>
+                        <button class="tab-button" data-tab="highscores" id="highscores-tab-btn">High Scores</button>
+                        <button class="tab-button" data-tab="leaderboard" id="leaderboard-tab-btn">Global Leaderboard</button>
+                    </div>
+                    <div id="restart-tab" class="tab-content active">
+                        <h2 id="game-over-title">Game Over!</h2>
+                        <p>Final Score: <span id="final-score">0</span></p>
+                        <div id="leaderboard-submit-section" class="leaderboard-submit-section hidden">
+                            <p id="submit-status" class="submit-status"></p>
+                            <button class="menu-btn" id="submit-score-btn">Submit Score to Leaderboard</button>
+                        </div>
+                        <button class="menu-btn" id="play-again-btn">Play Again</button>
+                        <button class="menu-btn" id="menu-from-gameover-btn">Back to Arcade</button>
+                    </div>
+                    <div id="highscores-tab" class="tab-content">
+                        <h2 id="highscores-title">High Scores</h2>
+                        <div id="high-scores-list"></div>
+                    </div>
+                    <div id="leaderboard-tab" class="tab-content">
+                        <h2 id="leaderboard-title">Global Leaderboard</h2>
+                        <div id="global-leaderboard-list" class="global-leaderboard-list">
+                            <p style="text-align: center; opacity: 0.7;">Loading leaderboard...</p>
+                        </div>
+                    </div>
                 </div>
                 <div id="win-message" class="game-over hidden" style="background: rgba(0, 200, 0, 0.9);">
                     <h2>You Win! 🎉</h2>
@@ -117,7 +201,7 @@
                     <button class="menu-btn" id="new-game-btn">New Game</button>
                 </div>
                 <div class="instructions">
-                    <p class="desktop-text">Use arrow keys or WASD to move tiles | Combine tiles with the same number</p>
+                    <p class="desktop-text">Use arrow keys or WASD to move tiles | Combine tiles with the same number | Press P to pause</p>
                     <p class="mobile-text">Swipe to move tiles | Combine tiles with the same number</p>
                 </div>
             </div>
@@ -142,7 +226,12 @@
             </div>
         </div>
     </footer>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../shared/storage.js"></script>
+    <script src="../config.js"></script>
+    <script src="../leaderboard.js"></script>
+    <script src="../shared/username.js"></script>
     <script src="2048.js"></script>
     <script src="../background.js"></script>
     <script src="../shared/nav.js"></script>

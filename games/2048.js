@@ -3,30 +3,288 @@ const Game2048 = {
     grid: [],
     score: 0,
     highScore: 0,
+    highScores: [],
     gameOver: false,
     won: false,
+    gamePaused: false,
+    gameStarted: false,
     gridElement: null,
     SIZE: 4,
     animating: false,
     oldGridState: null,
     lastMoveDirection: null,
     tileMovements: [], // Track tile movements for animation
+    theme: 'default',
     
     init() {
         this.gridElement = document.getElementById('grid');
         
-        // Load high score
+        // Initialize leaderboard
+        if (typeof Leaderboard !== 'undefined') {
+            Leaderboard.init();
+        }
+        
+        // Load high scores
         if (typeof ArcadeStorage !== 'undefined') {
-            this.highScore = ArcadeStorage.getBestScore(ArcadeStorage.GAMES.GAME2048);
+            this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.GAME2048);
+            this.highScore = this.highScores.length > 0 ? 
+                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
             document.getElementById('high-score').textContent = this.highScore;
         }
+        
+        // Setup theme selector
+        this.setupTheme();
         
         // Setup controls
         this.setupControls();
         this.setupMenu();
+        this.setupPauseMenu();
+        this.setupGameOverTabs();
+        this.setupLeaderboardSubmission();
         
         // Initialize game
         this.resetGame();
+    },
+    
+    setupTheme() {
+        const selector = document.getElementById('theme-selector');
+        if (!selector) return;
+        
+        // Apply initial theme
+        this.applyTheme(this.theme);
+        
+        selector.addEventListener('change', (e) => {
+            this.theme = e.target.value;
+            this.applyTheme(this.theme);
+        });
+    },
+    
+    applyTheme(theme) {
+        const gameContainer = document.getElementById('game2048');
+        if (!gameContainer) return;
+        
+        // Remove all theme classes
+        gameContainer.classList.remove('theme-default', 'theme-dark', 'theme-colorful', 'theme-pastel');
+        // Add new theme class
+        gameContainer.classList.add(`theme-${theme}`);
+    },
+    
+    setupPauseMenu() {
+        const pauseMenu = document.getElementById('pause-menu');
+        const resumeBtn = document.getElementById('resume-btn');
+        const backToMenuBtn = document.getElementById('back-to-menu-btn');
+        
+        if (resumeBtn) {
+            resumeBtn.addEventListener('click', () => {
+                if (!this.gameStarted) {
+                    this.startGame();
+                } else if (this.gamePaused) {
+                    this.resumeGame();
+                }
+            });
+        }
+        
+        if (backToMenuBtn) {
+            backToMenuBtn.addEventListener('click', () => {
+                window.location.href = '../index.html';
+            });
+        }
+        
+        // Pause on P key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p' || e.key === 'P') {
+                if (this.gameStarted && !this.gameOver && !this.animating && !this.gamePaused) {
+                    this.pauseGame();
+                } else if (this.gamePaused) {
+                    this.resumeGame();
+                }
+            }
+        });
+    },
+    
+    setupGameOverTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.getAttribute('data-tab');
+                
+                // Update active button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Update active content
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                if (tab === 'restart') {
+                    document.getElementById('restart-tab').classList.add('active');
+                } else if (tab === 'highscores') {
+                    document.getElementById('highscores-tab').classList.add('active');
+                    this.loadHighScores();
+                } else if (tab === 'leaderboard') {
+                    document.getElementById('leaderboard-tab').classList.add('active');
+                    this.loadGlobalLeaderboard();
+                }
+            });
+        });
+    },
+    
+    setupLeaderboardSubmission() {
+        const submitBtn = document.getElementById('submit-score-btn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', () => {
+                this.submitScoreToLeaderboard();
+            });
+        }
+    },
+    
+    async submitScoreToLeaderboard() {
+        const submitBtn = document.getElementById('submit-score-btn');
+        const submitStatus = document.getElementById('submit-status');
+        
+        if (!submitBtn || !submitStatus) return;
+        
+        if (typeof Leaderboard === 'undefined' || !Leaderboard.isAvailable()) {
+            submitStatus.textContent = 'Leaderboard not available. Please configure Supabase.';
+            submitStatus.style.color = '#ffa502';
+            return;
+        }
+        
+        if (typeof UsernameManager === 'undefined' || !UsernameManager.hasUsernameSet()) {
+            submitStatus.textContent = 'Please set a username first.';
+            submitStatus.style.color = '#ffa502';
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitStatus.textContent = 'Submitting score...';
+        submitStatus.style.color = '#fff';
+        
+        try {
+            const username = UsernameManager.getUsername();
+            const nameString = String(username).trim().substring(0, 3).toUpperCase();
+            const scoreNumber = Number(this.score);
+            
+            const result = await Leaderboard.submitScore(
+                nameString,
+                scoreNumber,
+                '2048'
+            );
+            
+            if (result.success) {
+                submitStatus.textContent = 'Score submitted successfully! 🎉';
+                submitStatus.style.color = '#51cf66';
+                // Refresh leaderboard if it's currently displayed
+                if (document.getElementById('leaderboard-tab') && 
+                    document.getElementById('leaderboard-tab').classList.contains('active')) {
+                    this.loadGlobalLeaderboard();
+                }
+            } else {
+                submitStatus.textContent = `Error: ${result.error || 'Failed to submit score'}`;
+                submitStatus.style.color = '#ff4757';
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error submitting score:', error);
+            submitStatus.textContent = 'Error submitting score. Please try again.';
+            submitStatus.style.color = '#ff4757';
+            submitBtn.disabled = false;
+        }
+    },
+    
+    async loadGlobalLeaderboard() {
+        const leaderboardList = document.getElementById('global-leaderboard-list');
+        const leaderboardTitle = document.getElementById('leaderboard-title');
+        
+        if (leaderboardTitle) {
+            leaderboardTitle.textContent = 'Global Leaderboard - 2048';
+        }
+        
+        if (!leaderboardList) return;
+        
+        if (typeof Leaderboard === 'undefined' || !Leaderboard.isAvailable()) {
+            leaderboardList.innerHTML = 
+                '<p style="text-align: center; opacity: 0.7;">Leaderboard not available. Please configure Supabase.</p>';
+            return;
+        }
+        
+        leaderboardList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Loading leaderboard...</p>';
+        
+        try {
+            const result = await Leaderboard.getLeaderboard('2048', 3);
+            
+            if (result.success && result.scores && result.scores.length > 0) {
+                leaderboardList.innerHTML = result.scores.map((entry, index) => {
+                    const rank = index + 1;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                    return `
+                        <div class="leaderboard-entry">
+                            <span class="leaderboard-rank">${medal}</span>
+                            <span class="leaderboard-name">${entry.name || 'Player'}</span>
+                            <span class="leaderboard-score">${entry.score || 0}</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                leaderboardList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No scores yet. Be the first!</p>';
+            }
+        } catch (error) {
+            console.error('Error loading leaderboard:', error);
+            leaderboardList.innerHTML = '<p style="text-align: center; opacity: 0.7;">Error loading leaderboard.</p>';
+        }
+    },
+    
+    loadHighScores() {
+        const highScoresList = document.getElementById('high-scores-list');
+        if (!highScoresList) return;
+        
+        if (typeof ArcadeStorage === 'undefined') {
+            highScoresList.innerHTML = '<p style="text-align: center; opacity: 0.7;">High scores not available.</p>';
+            return;
+        }
+        
+        const scores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.GAME2048);
+        
+        if (scores.length === 0) {
+            highScoresList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No scores yet. Play to set your first record!</p>';
+            return;
+        }
+        
+        highScoresList.innerHTML = scores.slice(0, 3).map((scoreEntry, index) => {
+            const score = typeof scoreEntry === 'number' ? scoreEntry : scoreEntry.score;
+            const username = typeof scoreEntry === 'number' ? 'Player' : (scoreEntry.username || 'Player');
+            const rank = index + 1;
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+            return `
+                <div class="high-score-entry">
+                    <span class="high-score-rank">${medal}</span>
+                    <span class="high-score-name">${username}</span>
+                    <span class="high-score-value">${score}</span>
+                </div>
+            `;
+        }).join('');
+    },
+    
+    pauseGame() {
+        if (this.gamePaused || this.gameOver || this.animating) return;
+        this.gamePaused = true;
+        document.getElementById('pause-menu').classList.remove('hidden');
+        document.getElementById('pause-title').textContent = 'Paused';
+        document.getElementById('pause-instructions').textContent = 'Press P or click Play to resume';
+    },
+    
+    resumeGame() {
+        if (!this.gamePaused) return;
+        this.gamePaused = false;
+        document.getElementById('pause-menu').classList.add('hidden');
+    },
+    
+    startGame() {
+        if (this.gameStarted) return;
+        this.gameStarted = true;
+        this.gamePaused = false;
+        document.getElementById('pause-menu').classList.add('hidden');
     },
     
     resetGame() {
@@ -34,6 +292,8 @@ const Game2048 = {
         this.score = 0;
         this.gameOver = false;
         this.won = false;
+        this.gamePaused = false;
+        this.gameStarted = false;
         this.oldGridState = null;
         
         // Add two random tiles
@@ -45,6 +305,9 @@ const Game2048 = {
         document.getElementById('score').textContent = this.score;
         document.getElementById('game-over').classList.add('hidden');
         document.getElementById('win-message').classList.add('hidden');
+        document.getElementById('pause-menu').classList.remove('hidden');
+        document.getElementById('pause-title').textContent = 'Ready to Play';
+        document.getElementById('pause-instructions').textContent = 'Use arrow keys or WASD to start';
     },
     
     addRandomTile() {
@@ -71,6 +334,12 @@ const Game2048 = {
         document.addEventListener('keydown', (e) => {
             if (this.gameOver && !this.won) return;
             if (this.animating) return;
+            if (this.gamePaused && e.key !== 'p' && e.key !== 'P') return;
+            
+            // Start game on first move
+            if (!this.gameStarted) {
+                this.startGame();
+            }
             
             let moved = false;
             switch(e.key) {
@@ -116,6 +385,12 @@ const Game2048 = {
             e.preventDefault();
             if (this.gameOver && !this.won) return;
             if (this.animating) return;
+            if (this.gamePaused) return;
+            
+            // Start game on first move
+            if (!this.gameStarted) {
+                this.startGame();
+            }
             
             const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
@@ -136,22 +411,35 @@ const Game2048 = {
     },
     
     setupMenu() {
-        document.getElementById('play-again-btn').addEventListener('click', () => {
-            this.resetGame();
-        });
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const menuFromGameOverBtn = document.getElementById('menu-from-gameover-btn');
+        const continueBtn = document.getElementById('continue-btn');
+        const newGameBtn = document.getElementById('new-game-btn');
         
-        document.getElementById('back-to-menu-btn').addEventListener('click', () => {
-            window.location.href = '../index.html';
-        });
+        if (playAgainBtn) {
+            playAgainBtn.addEventListener('click', () => {
+                this.resetGame();
+            });
+        }
         
-        document.getElementById('continue-btn').addEventListener('click', () => {
-            this.won = false;
-            document.getElementById('win-message').classList.add('hidden');
-        });
+        if (menuFromGameOverBtn) {
+            menuFromGameOverBtn.addEventListener('click', () => {
+                window.location.href = '../index.html';
+            });
+        }
         
-        document.getElementById('new-game-btn').addEventListener('click', () => {
-            this.resetGame();
-        });
+        if (continueBtn) {
+            continueBtn.addEventListener('click', () => {
+                this.won = false;
+                document.getElementById('win-message').classList.add('hidden');
+            });
+        }
+        
+        if (newGameBtn) {
+            newGameBtn.addEventListener('click', () => {
+                this.resetGame();
+            });
+        }
     },
     
     performMove(direction) {
@@ -507,16 +795,58 @@ const Game2048 = {
         // Check for game over (no moves available)
         if (!this.canMove()) {
             this.gameOver = true;
+            this.gameStarted = false;
             document.getElementById('final-score').textContent = this.score;
+            
+            // Check if this is a high score
+            let isHighScore = false;
+            const oldBestScore = this.highScores.length > 0 ? 
+                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
             
             // Save high score
             if (typeof ArcadeStorage !== 'undefined') {
                 ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.GAME2048, this.score);
-                this.highScore = ArcadeStorage.getBestScore(ArcadeStorage.GAMES.GAME2048);
+                this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.GAME2048);
+                const newBestScore = this.highScores.length > 0 ? 
+                    (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+                this.highScore = newBestScore;
                 document.getElementById('high-score').textContent = this.highScore;
+                
+                // Check if this is a new high score
+                if (this.score > oldBestScore) {
+                    isHighScore = true;
+                }
             }
             
             document.getElementById('game-over').classList.remove('hidden');
+            
+            // Show leaderboard submit section if high score and leaderboard available
+            const submitSection = document.getElementById('leaderboard-submit-section');
+            const submitStatus = document.getElementById('submit-status');
+            
+            if (isHighScore && typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable()) {
+                if (typeof UsernameManager !== 'undefined' && !UsernameManager.hasUsernameSet()) {
+                    // Show username prompt modal
+                    UsernameManager.showUsernameModal((username) => {
+                        // After username is set, automatically submit score
+                        this.submitScoreToLeaderboard();
+                    });
+                } else {
+                    // Username is set, show submit section
+                    if (submitSection) {
+                        submitSection.classList.remove('hidden');
+                    }
+                    if (submitStatus) {
+                        submitStatus.textContent = 'Click to submit your score to the global leaderboard!';
+                        submitStatus.style.color = '#4ecdc4';
+                    }
+                }
+            } else {
+                // Not a high score or leaderboard not available, hide submit section
+                if (submitSection) {
+                    submitSection.classList.add('hidden');
+                }
+            }
         }
         
         // Update score display
