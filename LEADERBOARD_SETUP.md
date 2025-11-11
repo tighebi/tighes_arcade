@@ -27,7 +27,7 @@ This guide will help you set up the global leaderboard feature for all arcade ga
 ```sql
 CREATE TABLE arcade_leaderboard (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(3) NOT NULL,
+    name VARCHAR(50) NOT NULL,
     score INTEGER NOT NULL,
     game_mode VARCHAR(20) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -57,6 +57,12 @@ CREATE POLICY "Allow public insert" ON arcade_leaderboard
 - `flappy` - Flappy Bird game
 - `2048` - 2048 game
 
+**Important:** If you already have an `arcade_leaderboard` table with `VARCHAR(3)` for the name field, you'll need to alter it to support longer usernames:
+
+```sql
+ALTER TABLE arcade_leaderboard ALTER COLUMN name TYPE VARCHAR(50);
+```
+
 4. Click "Run" to execute the SQL
 5. You should see a success message
 
@@ -85,10 +91,11 @@ CONFIG.SUPABASE_ANON_KEY = 'your-anon-key-here'; // Your anon/public key
 
 1. Open your game in a web browser
 2. Play a game (Snake, Breakout, Flappy Bird, or 2048) and get a score
-3. When the game ends, you should see an input field for your initials (Snake game only for now)
-4. Enter your initials (up to 3 letters) and click "Submit Score"
-5. Click on the "Global Leaderboard" tab to see your score (top 3 scores per game)
-6. The leaderboard shows the top 3 scores for each game mode
+3. When you achieve a high score, you'll be prompted to enter your username
+4. Enter your username (up to 50 characters) and click "Submit Score"
+5. Your score will be automatically submitted to the global leaderboard
+6. Click on the "Global Leaderboard" tab to see your score (top 3 scores per game)
+7. The leaderboard shows the top 3 scores for each game mode with full usernames
 
 ## Troubleshooting
 

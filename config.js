@@ -86,7 +86,7 @@ const POTION_EFFECTS = {
 // 3. Go to SQL Editor and run this SQL to create the table:
 //    CREATE TABLE arcade_leaderboard (
 //        id BIGSERIAL PRIMARY KEY,
-//        name VARCHAR(3) NOT NULL,
+//        name VARCHAR(50) NOT NULL,
 //        score INTEGER NOT NULL,
 //        game_mode VARCHAR(20) NOT NULL,
 //        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -109,6 +109,10 @@ const POTION_EFFECTS = {
 //        WITH CHECK (true);
 //    
 //    Note: game_mode values supported: 'classic', 'powerup', 'breakout', 'flappy', '2048'
+//    
+//    If you already have the table with VARCHAR(3), alter it to support longer names:
+//    ALTER TABLE arcade_leaderboard ALTER COLUMN name TYPE VARCHAR(50);
+//    
 // 4. Go to Settings > API and copy your Project URL and anon public key
 // 5. Replace the values below with your Supabase credentials
 CONFIG.SUPABASE_URL = 'https://uuztspmqpxcwxhkvktfc.supabase.co'; // Your Supabase project URL

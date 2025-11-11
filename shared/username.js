@@ -12,8 +12,8 @@ const UsernameManager = {
     // Set username
     setUsername(username) {
         if (username && username.trim().length > 0) {
-            // Limit username length and sanitize
-            const cleanUsername = username.trim().substring(0, 20);
+            // Limit username length to 50 characters (matches database limit)
+            const cleanUsername = username.trim().substring(0, 50);
             localStorage.setItem(this.STORAGE_KEY, cleanUsername);
             return cleanUsername;
         }
@@ -41,13 +41,13 @@ const UsernameManager = {
             modal.className = 'username-modal';
             modal.innerHTML = `
                 <div class="username-modal-content">
-                    <h2>🎮 Welcome to Tighe's Arcade!</h2>
-                    <p>Enter your username to personalize your gaming experience:</p>
-                    <input type="text" id="username-input" placeholder="Enter username" maxlength="20" class="username-input">
+                    <h2>🎉 High Score!</h2>
+                    <p>Enter your username to submit your score to the global leaderboard:</p>
+                    <input type="text" id="username-input" placeholder="Enter username" maxlength="50" class="username-input">
                     <div class="username-modal-buttons">
-                        <button id="username-submit-btn" class="username-btn username-btn-primary">Continue</button>
+                        <button id="username-submit-btn" class="username-btn username-btn-primary">Submit Score</button>
                     </div>
-                    <p class="username-note">You can change this later in settings</p>
+                    <p class="username-note">Your username will be used for all leaderboard entries</p>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -79,8 +79,19 @@ const UsernameManager = {
             });
         }
         
-        // Show modal
+        // Show modal and update text if needed
         modal.classList.add('active');
+        const title = modal.querySelector('h2');
+        const description = modal.querySelector('p');
+        const submitBtn = document.getElementById('username-submit-btn');
+        const note = modal.querySelector('.username-note');
+        
+        // Update modal content for high score context
+        if (title) title.textContent = '🎉 High Score!';
+        if (description) description.textContent = 'Enter your username to submit your score to the global leaderboard:';
+        if (submitBtn) submitBtn.textContent = 'Submit Score';
+        if (note) note.textContent = 'Your username will be used for all leaderboard entries';
+        
         const input = document.getElementById('username-input');
         if (input) {
             input.value = this.getUsername() !== this.DEFAULT_USERNAME ? this.getUsername() : '';

@@ -36,31 +36,35 @@ const Leaderboard = {
         }
         
         try {
-            // Validate inputs
-            if (!name || name.trim().length === 0) {
+            // Validate inputs - ensure name is a string
+            let nameString = String(name || '').trim();
+            if (nameString.length === 0) {
                 return { success: false, error: 'Name is required' };
             }
-            if (name.length > 3) {
-                name = name.substring(0, 3).toUpperCase();
-            } else {
-                name = name.toUpperCase();
+            
+            // Allow any length username (limit to reasonable length for database)
+            // Database should support at least 50 characters, but we'll limit to 50 for safety
+            if (nameString.length > 50) {
+                nameString = nameString.substring(0, 50);
             }
             
-            if (typeof score !== 'number' || score < 0) {
+            // Ensure score is a number
+            const scoreNumber = Number(score);
+            if (isNaN(scoreNumber) || scoreNumber < 0) {
                 return { success: false, error: 'Invalid score' };
             }
             
             // Map game modes to database values (support all games)
             // gameMode can be: 'classic', 'powerup', 'breakout', 'flappy', '2048'
-            const mode = gameMode || 'classic';
+            const mode = String(gameMode || 'classic');
             
             // Insert into Supabase
             const { data, error } = await this.client
                 .from('arcade_leaderboard')
                 .insert([
                     {
-                        name: name.trim(),
-                        score: score,
+                        name: nameString,
+                        score: scoreNumber,
                         game_mode: mode,
                         created_at: new Date().toISOString()
                     }

@@ -271,15 +271,32 @@ function gameOver() {
     gameState.gameRunning = false;
     gameState.gameStarted = false;
     
+    let isHighScore = false;
     if (gameState.gameMode !== 'zen') {
         const isPowerUp = gameState.gameMode === 'powerup';
+        
+        // Get old scores before updating
+        const oldScores = isPowerUp ? gameState.powerUpHighScores : gameState.highScores;
+        const oldBestScore = oldScores.length > 0 ? (typeof oldScores[0] === 'number' ? oldScores[0] : oldScores[0].score) : 0;
+        
+        // Update scores
         const updatedScores = Storage.updateHighScores(gameState.score, isPowerUp);
+        
+        // Check if this is a new high score (score is better than previous best)
+        if (updatedScores.length > 0) {
+            const newBestScore = typeof updatedScores[0] === 'number' ? updatedScores[0] : updatedScores[0].score;
+            // It's a high score if the new score is greater than the old best
+            if (gameState.score > oldBestScore) {
+                isHighScore = true;
+            }
+        }
         
         if (isPowerUp) {
             gameState.powerUpHighScores = updatedScores;
         } else {
             gameState.highScores = updatedScores;
-            gameState.highScore = updatedScores[0] || 0;
+            const bestScore = updatedScores.length > 0 ? (typeof updatedScores[0] === 'number' ? updatedScores[0] : updatedScores[0].score) : 0;
+            gameState.highScore = bestScore;
         }
         
         // Update high score displays
@@ -287,7 +304,7 @@ function gameOver() {
         updateHighScoreDisplay();
     }
     
-    Menu.showGameOver(gameState.score, gameState.gameMode);
+    Menu.showGameOver(gameState.score, gameState.gameMode, isHighScore);
 }
 
 // Optimized game loop using requestAnimationFrame

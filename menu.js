@@ -15,7 +15,6 @@ const Menu = {
         highscoresBtn: null,
         finalScore: null,
         leaderboardSubmitSection: null,
-        playerInitialsInput: null,
         submitScoreBtn: null,
         submitStatus: null,
         globalLeaderboardList: null,
@@ -42,7 +41,6 @@ const Menu = {
         this.elements.highscoresBtn = document.getElementById('highscores-tab-btn');
         this.elements.finalScore = document.getElementById('final-score');
         this.elements.leaderboardSubmitSection = document.getElementById('leaderboard-submit-section');
-        this.elements.playerInitialsInput = document.getElementById('player-initials');
         this.elements.submitScoreBtn = document.getElementById('submit-score-btn');
         this.elements.submitStatus = document.getElementById('submit-status');
         this.elements.globalLeaderboardList = document.getElementById('global-leaderboard-list');
@@ -261,7 +259,7 @@ const Menu = {
         }).join('');
     },
     
-    showGameOver(finalScore, gameMode = 'classic') {
+    showGameOver(finalScore, gameMode = 'classic', isHighScore = false) {
         if (this.elements.finalScore) {
             this.elements.finalScore.textContent = finalScore;
         }
@@ -274,19 +272,27 @@ const Menu = {
         this.currentGameScore = finalScore;
         this.currentGameMode = gameMode;
         
-        // Show leaderboard submit section if leaderboard is available and not in zen mode
-        if (typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable() && gameMode !== 'zen') {
-            if (this.elements.leaderboardSubmitSection) {
-                this.elements.leaderboardSubmitSection.classList.remove('hidden');
-            }
-            if (this.elements.playerInitialsInput) {
-                this.elements.playerInitialsInput.value = '';
-                this.elements.playerInitialsInput.focus();
-            }
-            if (this.elements.submitStatus) {
-                this.elements.submitStatus.textContent = '';
+        // Check if we should prompt for username (only on high score)
+        if (isHighScore && typeof UsernameManager !== 'undefined' && typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable() && gameMode !== 'zen') {
+            // Check if username is set
+            if (!UsernameManager.hasUsernameSet()) {
+                // Show username prompt modal
+                UsernameManager.showUsernameModal((username) => {
+                    // After username is set, automatically submit score
+                    this.submitScoreToLeaderboard();
+                });
+            } else {
+                // Username is set, show submit section
+                if (this.elements.leaderboardSubmitSection) {
+                    this.elements.leaderboardSubmitSection.classList.remove('hidden');
+                }
+                if (this.elements.submitStatus) {
+                    this.elements.submitStatus.textContent = 'Click to submit your score to the global leaderboard!';
+                    this.elements.submitStatus.style.color = '#4ecdc4';
+                }
             }
         } else {
+            // Not a high score or leaderboard not available, hide submit section
             if (this.elements.leaderboardSubmitSection) {
                 this.elements.leaderboardSubmitSection.classList.add('hidden');
             }
@@ -304,34 +310,28 @@ const Menu = {
     
     // Setup leaderboard submission
     setupLeaderboardSubmission() {
-        if (!this.elements.submitScoreBtn || !this.elements.playerInitialsInput) return;
+        if (!this.elements.submitScoreBtn) return;
         
         // Submit on button click
         this.elements.submitScoreBtn.addEventListener('click', () => {
             this.submitScoreToLeaderboard();
         });
-        
-        // Submit on Enter key
-        this.elements.playerInitialsInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.submitScoreToLeaderboard();
-            }
-        });
-        
-        // Only allow letters
-        this.elements.playerInitialsInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
-        });
     },
     
     // Submit score to global leaderboard
     async submitScoreToLeaderboard() {
-        if (!this.elements.playerInitialsInput || !this.elements.submitStatus) return;
+        if (!this.elements.submitStatus) return;
         
-        const initials = this.elements.playerInitialsInput.value.trim();
+        // Get username from UsernameManager, use full username for leaderboard
+        let name = '';
+        if (typeof UsernameManager !== 'undefined') {
+            const username = UsernameManager.getUsername();
+            // Use full username
+            name = username;
+        }
         
-        if (initials.length === 0) {
-            this.elements.submitStatus.textContent = 'Please enter your initials';
+        if (!name || name.length === 0) {
+            this.elements.submitStatus.textContent = 'Please set your username first';
             this.elements.submitStatus.style.color = '#ff4757';
             return;
         }
@@ -342,9 +342,10 @@ const Menu = {
             return;
         }
         
-        // Disable input and button while submitting
-        this.elements.playerInitialsInput.disabled = true;
-        this.elements.submitScoreBtn.disabled = true;
+        // Disable button while submitting
+        if (this.elements.submitScoreBtn) {
+            this.elements.submitScoreBtn.disabled = true;
+        }
         this.elements.submitStatus.textContent = 'Submitting...';
         this.elements.submitStatus.style.color = '#fff';
         
@@ -357,14 +358,19 @@ const Menu = {
                 // Zen mode doesn't submit to leaderboard
                 this.elements.submitStatus.textContent = 'Zen mode scores are not submitted to leaderboard';
                 this.elements.submitStatus.style.color = '#ffa502';
-                this.elements.playerInitialsInput.disabled = false;
-                this.elements.submitScoreBtn.disabled = false;
+                if (this.elements.submitScoreBtn) {
+                    this.elements.submitScoreBtn.disabled = false;
+                }
                 return;
             }
             
+            // Ensure name is a string, not an object
+            const nameString = String(name).trim();
+            const scoreNumber = Number(this.currentGameScore);
+            
             const result = await Leaderboard.submitScore(
-                initials,
-                this.currentGameScore,
+                nameString,
+                scoreNumber,
                 gameMode
             );
             
@@ -379,17 +385,19 @@ const Menu = {
             } else {
                 this.elements.submitStatus.textContent = `Error: ${result.error || 'Failed to submit score'}`;
                 this.elements.submitStatus.style.color = '#ff4757';
-                // Re-enable input and button on error
-                this.elements.playerInitialsInput.disabled = false;
-                this.elements.submitScoreBtn.disabled = false;
+                // Re-enable button on error
+                if (this.elements.submitScoreBtn) {
+                    this.elements.submitScoreBtn.disabled = false;
+                }
             }
         } catch (error) {
             console.error('Error submitting score:', error);
             this.elements.submitStatus.textContent = 'Error submitting score. Please try again.';
             this.elements.submitStatus.style.color = '#ff4757';
-            // Re-enable input and button on error
-            this.elements.playerInitialsInput.disabled = false;
-            this.elements.submitScoreBtn.disabled = false;
+            // Re-enable button on error
+            if (this.elements.submitScoreBtn) {
+                this.elements.submitScoreBtn.disabled = false;
+            }
         }
     },
     

@@ -72,22 +72,5 @@
     <script src="shared/storage.js"></script>
     <script src="shared/nav.js"></script>
     <script src="background.js"></script>
-    <script>
-        // Check and prompt for username on first visit
-        window.addEventListener('load', () => {
-            // Check if username has been set at all, if not show modal
-            if (typeof UsernameManager !== 'undefined') {
-                const hasUsername = UsernameManager.hasUsernameSet();
-                if (!hasUsername) {
-                    // Show username prompt after a short delay for better UX
-                    setTimeout(() => {
-                        UsernameManager.showUsernameModal((username) => {
-                            console.log('Username set to:', username);
-                        });
-                    }, 500);
-                }
-            }
-        });
-    </script>
 </body>
 </html>
