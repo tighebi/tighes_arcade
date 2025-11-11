@@ -228,12 +228,43 @@ const Menu = {
             return;
         }
         
+        // Load from ArcadeStorage if available (has usernames)
+        if (typeof ArcadeStorage !== 'undefined') {
+            const arcadeScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_CLASSIC);
+            if (arcadeScores.length > 0) {
+                list.innerHTML = arcadeScores.slice(0, 5).map((scoreEntry, index) => {
+                    // Handle both old numeric format and new object format
+                    let score, username;
+                    if (typeof scoreEntry === 'number') {
+                        score = scoreEntry;
+                        username = 'Player';
+                    } else if (typeof scoreEntry === 'object' && scoreEntry !== null) {
+                        score = scoreEntry.score || 0;
+                        username = scoreEntry.username || 'Player';
+                    } else {
+                        score = 0;
+                        username = 'Player';
+                    }
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    return `
+                        <div class="high-score-item">
+                            <span><span class="rank">${index + 1}.</span> ${medal} <strong>${username}</strong></span>
+                            <span class="score">${score} points</span>
+                        </div>
+                    `;
+                }).join('');
+                return;
+            }
+        }
+        
+        // Fallback to old numeric scores
         list.innerHTML = scores.slice(0, 5).map((score, index) => {
+            const scoreValue = typeof score === 'object' ? (score.score || 0) : score;
             const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
             return `
                 <div class="high-score-item">
                     <span><span class="rank">${index + 1}.</span> ${medal}</span>
-                    <span class="score">${score} points</span>
+                    <span class="score">${scoreValue} points</span>
                 </div>
             `;
         }).join('');
@@ -248,12 +279,43 @@ const Menu = {
             return;
         }
         
+        // Load from ArcadeStorage if available (has usernames)
+        if (typeof ArcadeStorage !== 'undefined') {
+            const arcadeScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_POWERUP);
+            if (arcadeScores.length > 0) {
+                list.innerHTML = arcadeScores.slice(0, 5).map((scoreEntry, index) => {
+                    // Handle both old numeric format and new object format
+                    let score, username;
+                    if (typeof scoreEntry === 'number') {
+                        score = scoreEntry;
+                        username = 'Player';
+                    } else if (typeof scoreEntry === 'object' && scoreEntry !== null) {
+                        score = scoreEntry.score || 0;
+                        username = scoreEntry.username || 'Player';
+                    } else {
+                        score = 0;
+                        username = 'Player';
+                    }
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    return `
+                        <div class="high-score-item">
+                            <span><span class="rank">${index + 1}.</span> ${medal} <strong>${username}</strong></span>
+                            <span class="score">${score} points</span>
+                        </div>
+                    `;
+                }).join('');
+                return;
+            }
+        }
+        
+        // Fallback to old numeric scores
         list.innerHTML = scores.slice(0, 5).map((score, index) => {
+            const scoreValue = typeof score === 'object' ? (score.score || 0) : score;
             const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
             return `
                 <div class="high-score-item">
                     <span><span class="rank">${index + 1}.</span> ${medal}</span>
-                    <span class="score">${score} points</span>
+                    <span class="score">${scoreValue} points</span>
                 </div>
             `;
         }).join('');
@@ -462,7 +524,7 @@ const Menu = {
             button.addEventListener('click', () => {
                 const tabName = button.getAttribute('data-tab');
                 
-                if (tabName === 'restart' && callbacks.onRestart) {
+                if (tabName === 'overview' && callbacks.onRestart) {
                     callbacks.onRestart();
                     return;
                 }

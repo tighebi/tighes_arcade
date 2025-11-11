@@ -10,6 +10,7 @@ const FlappyGame = {
     gameRunning: false,
     gameStarted: false,
     gamePaused: false,
+    gameOver: false,
     animationId: null,
     pipeWidth: 45,
     pipeGap: 180,
@@ -52,13 +53,20 @@ const FlappyGame = {
         // Load high scores
         if (typeof ArcadeStorage !== 'undefined') {
             this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.FLAPPY);
-            this.highScore = this.highScores.length > 0 ? 
-                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+            if (this.highScores.length > 0) {
+                const bestEntry = this.highScores[0];
+                this.highScore = typeof bestEntry === 'number' ? bestEntry : (bestEntry.score || 0);
+            } else {
+                this.highScore = 0;
+            }
             document.getElementById('high-score').textContent = this.highScore;
         }
         
         // Setup difficulty selector
         this.setupDifficulty();
+        
+        // Setup main menu
+        this.setupMainMenu();
         
         // Setup event listeners
         this.setupControls();
@@ -67,7 +75,7 @@ const FlappyGame = {
         this.setupGameOverTabs();
         this.setupLeaderboardSubmission();
         
-        // Initialize game
+        // Initialize game (but don't show it yet)
         this.resetGame();
         
         // Start game loop
@@ -79,14 +87,36 @@ const FlappyGame = {
         if (!selector) return;
         
         selector.addEventListener('change', (e) => {
-            if (!this.gameStarted) {
-                this.difficulty = e.target.value;
-                this.applyDifficulty();
-                this.resetGame();
-            }
+            this.difficulty = e.target.value;
+            this.applyDifficulty();
         });
         
         this.applyDifficulty();
+    },
+    
+    setupMainMenu() {
+        const startBtn = document.getElementById('start-game-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                // Hide main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.add('hidden');
+                }
+                // Show game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.remove('hidden');
+                }
+                // Show pause menu as "Ready to Play"
+                const pauseMenu = document.getElementById('pause-menu');
+                if (pauseMenu) {
+                    pauseMenu.classList.remove('hidden');
+                    document.getElementById('pause-title').textContent = 'Ready to Play';
+                    document.getElementById('pause-instructions').textContent = 'Click or press SPACE to start';
+                }
+            });
+        }
     },
     
     applyDifficulty() {
@@ -115,7 +145,18 @@ const FlappyGame = {
         
         if (backToMenuBtn) {
             backToMenuBtn.addEventListener('click', () => {
-                window.location.href = '../index.html';
+                // Hide game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                // Show main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.remove('hidden');
+                }
+                // Reset game
+                this.resetGame();
             });
         }
         
@@ -146,8 +187,8 @@ const FlappyGame = {
                 // Update active content
                 tabContents.forEach(content => content.classList.remove('active'));
                 
-                if (tab === 'restart') {
-                    document.getElementById('restart-tab').classList.add('active');
+                if (tab === 'overview') {
+                    document.getElementById('overview-tab').classList.add('active');
                 } else if (tab === 'highscores') {
                     document.getElementById('highscores-tab').classList.add('active');
                     this.loadHighScores();
@@ -281,8 +322,18 @@ const FlappyGame = {
         }
         
         highScoresList.innerHTML = scores.slice(0, 3).map((scoreEntry, index) => {
-            const score = typeof scoreEntry === 'number' ? scoreEntry : scoreEntry.score;
-            const username = typeof scoreEntry === 'number' ? 'Player' : (scoreEntry.username || 'Player');
+            // Handle both old numeric format and new object format
+            let score, username;
+            if (typeof scoreEntry === 'number') {
+                score = scoreEntry;
+                username = 'Player';
+            } else if (typeof scoreEntry === 'object' && scoreEntry !== null) {
+                score = scoreEntry.score || 0;
+                username = scoreEntry.username || 'Player';
+            } else {
+                score = 0;
+                username = 'Player';
+            }
             const rank = index + 1;
             const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
             return `
@@ -314,29 +365,47 @@ const FlappyGame = {
         this.gameRunning = false;
         this.gameStarted = false;
         this.gamePaused = false;
+        this.gameOver = false;
         this.frameCount = 0;
         this.pipes = [];
         this.applyDifficulty();
         
-        // Reset bird
-        this.bird.y = this.canvas.height / 2;
+        // Reset bird to center of screen
+        if (this.canvas) {
+            this.bird.y = this.canvas.height / 2;
+        } else {
+            this.bird.y = 300; // Fallback if canvas not ready
+        }
         this.bird.velocity = 0;
         
         // Update UI
-        document.getElementById('score').textContent = this.score;
-        document.getElementById('game-over').classList.add('hidden');
-        document.getElementById('pause-menu').classList.remove('hidden');
-        document.getElementById('pause-title').textContent = 'Ready to Play';
-        document.getElementById('pause-instructions').textContent = 'Click or press SPACE to start';
+        const scoreEl = document.getElementById('score');
+        const gameOverEl = document.getElementById('game-over');
+        const pauseMenuEl = document.getElementById('pause-menu');
+        
+        if (scoreEl) scoreEl.textContent = this.score;
+        if (gameOverEl) gameOverEl.classList.add('hidden');
+        if (pauseMenuEl) {
+            pauseMenuEl.classList.remove('hidden');
+            const pauseTitle = document.getElementById('pause-title');
+            const pauseInstructions = document.getElementById('pause-instructions');
+            if (pauseTitle) pauseTitle.textContent = 'Ready to Play';
+            if (pauseInstructions) pauseInstructions.textContent = 'Click or press SPACE to start';
+        }
     },
     
     setupControls() {
         const flap = () => {
-            // Don't allow control after game over or when paused
+            // Don't allow control after game over
+            if (this.gameOver) {
+                return;
+            }
+            // Don't allow control when paused (except to resume)
             if (this.gamePaused) {
                 this.resumeGame();
                 return;
             }
+            // Don't allow control if game has ended but not officially over
             if (!this.gameRunning && this.gameStarted) {
                 return;
             }
@@ -352,7 +421,7 @@ const FlappyGame = {
         
         // Keyboard
         document.addEventListener('keydown', (e) => {
-            if (e.key === ' ') {
+            if (e.key === ' ' && !this.gameOver) {
                 e.preventDefault();
                 flap();
             }
@@ -360,8 +429,10 @@ const FlappyGame = {
         
         // Touch
         this.canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            flap();
+            if (!this.gameOver) {
+                e.preventDefault();
+                flap();
+            }
         });
     },
     
@@ -377,7 +448,18 @@ const FlappyGame = {
         
         if (menuFromGameOverBtn) {
             menuFromGameOverBtn.addEventListener('click', () => {
-                window.location.href = '../index.html';
+                // Hide game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                // Show main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.remove('hidden');
+                }
+                // Reset game
+                this.resetGame();
             });
         }
     },
@@ -385,14 +467,24 @@ const FlappyGame = {
     startGame() {
         if (this.gameStarted) return;
         
+        // Reset bird position to center of screen
+        this.bird.y = this.canvas.height / 2;
+        this.bird.velocity = 0;
+        
         this.gameStarted = true;
         this.gameRunning = true;
         this.gamePaused = false;
-        document.getElementById('pause-menu').classList.add('hidden');
+        const pauseMenu = document.getElementById('pause-menu');
+        if (pauseMenu) {
+            pauseMenu.classList.add('hidden');
+        }
+        // Give the bird an initial jump when starting
         this.bird.velocity = this.bird.jumpStrength;
     },
     
     update() {
+        // Don't update if game is over
+        if (this.gameOver) return;
         if (!this.gameRunning || !this.gameStarted || this.gamePaused) return;
         
         this.frameCount++;
@@ -401,8 +493,10 @@ const FlappyGame = {
         this.pipeSpeed = this.basePipeSpeed + (this.frameCount * this.speedIncreaseRate);
         
         // Update bird
-        this.bird.velocity += this.bird.gravity;
-        this.bird.y += this.bird.velocity;
+        if (!this.gameOver) {
+            this.bird.velocity += this.bird.gravity;
+            this.bird.y += this.bird.velocity;
+        }
         
         // Bird boundaries
         if (this.bird.y < 0) {
@@ -410,7 +504,12 @@ const FlappyGame = {
             this.bird.velocity = 0;
         }
         if (this.bird.y + this.bird.height > this.canvas.height) {
-            this.gameOver();
+            // Prevent bird from going below canvas
+            this.bird.y = this.canvas.height - this.bird.height;
+            this.bird.velocity = 0;
+            if (!this.gameOver) {
+                this.gameOver();
+            }
             return;
         }
         
@@ -443,10 +542,13 @@ const FlappyGame = {
                 this.score++;
                 document.getElementById('score').textContent = this.score;
                 
-                // Update high score
-                if (this.score > this.highScore) {
-                    this.highScore = this.score;
-                    document.getElementById('high-score').textContent = this.highScore;
+                // Update high score display during gameplay
+                const currentHighScore = typeof this.highScore === 'object' ? (this.highScore.score || 0) : this.highScore;
+                if (this.score > currentHighScore) {
+                    const highScoreEl = document.getElementById('high-score');
+                    if (highScoreEl) {
+                        highScoreEl.textContent = this.score;
+                    }
                 }
             }
         }
@@ -489,18 +591,22 @@ const FlappyGame = {
         this.gameRunning = false;
         this.gameStarted = false;
         this.gamePaused = false;
+        this.gameOver = true; // Set game over flag to prevent controls
+        
+        // Stop bird movement
+        this.bird.velocity = 0;
         
         // Check if this is a high score
         let isHighScore = false;
         const oldBestScore = this.highScores.length > 0 ? 
-            (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+            (typeof this.highScores[0] === 'number' ? this.highScores[0] : (this.highScores[0].score || 0)) : 0;
         
         // Save high score
         if (typeof ArcadeStorage !== 'undefined') {
             ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.FLAPPY, this.score);
             this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.FLAPPY);
             const newBestScore = this.highScores.length > 0 ? 
-                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+                (typeof this.highScores[0] === 'number' ? this.highScores[0] : (this.highScores[0].score || 0)) : 0;
             this.highScore = newBestScore;
             
             // Check if this is a new high score
@@ -509,9 +615,28 @@ const FlappyGame = {
             }
         }
         
-        document.getElementById('final-score').textContent = this.score;
-        document.getElementById('high-score').textContent = this.highScore;
-        document.getElementById('game-over').classList.remove('hidden');
+        // Update final score display
+        const finalScoreEl = document.getElementById('final-score');
+        if (finalScoreEl) {
+            finalScoreEl.textContent = this.score;
+        }
+        
+        // Ensure high score is displayed as a number, not object
+        const highScoreDisplay = typeof this.highScore === 'object' ? (this.highScore.score || 0) : this.highScore;
+        const highScoreEl = document.getElementById('high-score');
+        if (highScoreEl) {
+            highScoreEl.textContent = highScoreDisplay;
+        }
+        
+        // Hide pause menu and show game over
+        const pauseMenu = document.getElementById('pause-menu');
+        const gameOverEl = document.getElementById('game-over');
+        if (pauseMenu) {
+            pauseMenu.classList.add('hidden');
+        }
+        if (gameOverEl) {
+            gameOverEl.classList.remove('hidden');
+        }
         
         // Show leaderboard submit section if high score and leaderboard available
         const submitSection = document.getElementById('leaderboard-submit-section');

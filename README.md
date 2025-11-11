@@ -33,7 +33,32 @@ A unified high score system that tracks your personal best across all games:
 - Flappy Bird
 - 2048
 
-View all your records in one place on the Hall of Fame page!
+View all your records in one place on the Hall of Fame page! Each score displays with your username for easy identification.
+
+## 🌐 Global Leaderboard
+
+Compete with players worldwide! The arcade features a global leaderboard powered by Supabase:
+- **Submit high scores** to compete globally
+- **Top 3 scores** displayed for each game mode
+- **Real-time updates** when new scores are submitted
+- **Username-based tracking** - scores are associated with your username
+- **Automatic submission** - high scores are automatically submitted after you set your username
+
+### Setting Up the Global Leaderboard
+
+To enable the global leaderboard feature, you'll need to set up a Supabase account and configure the database. See `LEADERBOARD_SETUP.md` for detailed instructions.
+
+**Note:** The leaderboard is optional. All games work perfectly without it, using local high score storage only.
+
+## 👤 Username System
+
+Personalize your gaming experience with usernames:
+- **Username prompt** appears when you achieve a high score (if not already set)
+- **Associates scores** with your username in the Hall of Fame
+- **Used for global leaderboard** submissions
+- **Stored locally** in your browser
+- **Full-length names** - no character limits (up to 50 characters)
+- **Changeable** - can be updated when achieving new high scores
 
 ## 🐍 Snake Game Details
 
@@ -89,25 +114,41 @@ Change the game's visual style and background:
 ## 🧱 Breakout Game Details
 
 ### Difficulty Levels
-- **Easy** - Larger paddle, slower ball, smaller grid (5 rows)
-- **Medium** - Balanced gameplay, medium speed, standard grid (5 rows) - **Default**
-- **Hard** - Smaller paddle, faster ball, larger grid (7 rows)
+- **Easy** - Larger paddle, slower ball, smaller grid (4 rows), **3 lives**
+- **Medium** - Balanced gameplay, medium speed, standard grid (5 rows), **2 lives** - **Default**
+- **Hard** - Smaller paddle, faster ball, larger grid (7 rows), **1 life**
+
+### Themes
+Customize the visual style of your game:
+- **Default** - Purple/blue theme with colorful bricks
+- **Neon** - Dark theme with neon-colored bricks
+- **Ocean** - Blue ocean theme with water-colored bricks
 
 ### Features
 - Progressive speed increase as you clear levels
 - Multiple levels with increasing difficulty
-- Lives system (3 lives)
+- **Lives system** - Difficulty-based lives (Easy=3, Medium=2, Hard=1)
+- **No popup on life loss** - Game continues silently when you lose a life (only shows game over when all lives are lost)
 - Smooth ball physics with proper bouncing
 - Visual circle ball rendering
 - Score tracking with high scores
+- **Game starts when you move the paddle** - No need to press start, just move!
+- **Ball stops when game over** - No bouncing after game ends
 
 ### Controls
-- **Mouse** - Move paddle with mouse (properly aligned on all screen sizes)
-- **Arrow Keys / WASD** - Move paddle left/right
-- **Touch** - Touch and drag on mobile (paddle aligns precisely with finger position)
+- **Mouse** - Move paddle with mouse (properly aligned on all screen sizes) - **Game starts automatically**
+- **Arrow Keys / WASD** - Move paddle left/right - **Game starts automatically**
+- **Touch** - Touch and drag on mobile (paddle aligns precisely with finger position) - **Game starts automatically**
 - **SPACE** - Launch ball (when stopped)
+- **P** - Pause/Resume game
 
 ## 🐦 Flappy Bird Game Details
+
+### Difficulty Levels
+Adjust the game's initial difficulty based on bird speed:
+- **Easy** - Slower initial speed, easier to control
+- **Medium** - Balanced speed - **Default**
+- **Hard** - Faster initial speed, more challenging
 
 ### Features
 - **Easier starting difficulty** - Faster jumping, thinner pipes, bigger gaps
@@ -116,6 +157,10 @@ Change the game's visual style and background:
 - Pipe obstacles with gaps
 - Score tracking
 - High score system
+- **Bird starts in center** - Always begins from the middle of the screen
+- **Bird resets properly** - No bugs with bird position on start
+- **Game over screen** - Full game over menu with tabs (Overview, High Scores, Global Leaderboard)
+- **Bird stops when game over** - No movement after losing
 
 ### Gameplay
 - **Click/Tap/SPACE** - Make the bird flap (faster jump for easier control)
@@ -123,6 +168,7 @@ Change the game's visual style and background:
 - Score increases as you pass pipes
 - Speed gradually increases for added challenge as the game progresses
 - Game starts easier but gets progressively more difficult
+- **P** - Pause/Resume game
 
 ### Visuals
 - Clean, retro-style graphics
@@ -132,6 +178,13 @@ Change the game's visual style and background:
 
 ## 🔢 2048 Game Details
 
+### Themes
+Customize the visual style of your game:
+- **Default** - Classic 2048 theme with warm colors
+- **Dark** - Dark mode theme with darker tiles
+- **Colorful** - Vibrant, colorful theme
+- **Pastel** - Soft, pastel-colored theme
+
 ### Features
 - Fast, smooth slide animations with straight-line movement
 - Constant-speed animations (no slowdown for merges)
@@ -140,6 +193,10 @@ Change the game's visual style and background:
 - Win condition at 2048 (can continue playing)
 - Score tracking
 - High score system
+- **Centered menu** - Start menu is vertically centered
+- **Full-screen background** - Background covers the entire screen, stays fixed when playing
+- **Game over screen** - Full game over menu with tabs (Overview, High Scores, Global Leaderboard)
+- **P** - Pause/Resume game
 
 ### Gameplay
 - Slide tiles in four directions
@@ -167,7 +224,25 @@ Change the game's visual style and background:
 - All games use the same high score system
 - Scores persist across browser sessions
 - Automatic migration from old scores
-- Top 10 scores per game mode
+- Top 3 scores per game mode (stored locally)
+- **Username association** - All scores are associated with your username
+- **Score objects** - Scores stored as objects with username, score, and date
+
+### Game Over Screens
+All games feature unified game over screens with tabs:
+- **Overview Tab** - Shows final score, "Play Again" button, and "Back to Menu" button
+- **High Scores Tab** - Displays your top 3 local high scores with usernames
+- **Global Leaderboard Tab** - Shows top 3 global scores (if Supabase is configured)
+- **Submit Score Button** - Appears when you achieve a high score (if leaderboard is available)
+
+### Unified Game Flow
+All games follow the same start/pause/resume flow:
+- **Main Menu** - Customize settings (theme, difficulty) before starting
+- **Start Game** - Begin gameplay from the main menu
+- **Pause Menu** - Press P or click pause to pause the game
+- **Game Over** - Full game over screen with tabs and options
+- **Play Again** - Quickly restart the game
+- **Back to Menu** - Return to the main menu to change settings
 
 ### Responsive Design
 - Works on desktop and mobile devices
@@ -176,6 +251,7 @@ Change the game's visual style and background:
 - Mobile-optimized interfaces
 - **Snake game** - Optimized canvas sizing on mobile to ensure all UI elements fit on screen
 - **Breakout game** - Precise touch/mouse alignment with paddle on all devices
+- **2048 game** - Centered menu and full-screen background on all devices
 
 ### Consistent Theming
 - Unified visual style across all games
@@ -184,6 +260,7 @@ Change the game's visual style and background:
 - Animated background effects (optimized performance)
 - Smooth transitions
 - Retro arcade aesthetic
+- **Theme customization** - Breakout and 2048 support multiple themes
 
 ## 🕹️ Controls
 
@@ -193,17 +270,20 @@ Change the game's visual style and background:
 - **Touch/Swipe** - Mobile controls
 
 ### Breakout
-- **Mouse/Arrow Keys/WASD** - Move paddle
-- **SPACE** - Launch ball
-- **Touch/Drag** - Mobile controls
+- **Mouse/Arrow Keys/WASD** - Move paddle (game starts automatically)
+- **SPACE** - Launch ball (when stopped)
+- **Touch/Drag** - Mobile controls (game starts automatically)
+- **P** - Pause/Resume
 
 ### Flappy Bird
 - **Click/Tap/SPACE** - Flap
 - **Touch** - Mobile controls
+- **P** - Pause/Resume
 
 ### 2048
 - **Arrow Keys/WASD** - Move tiles
 - **Swipe** - Mobile controls
+- **P** - Pause/Resume
 
 ## 🚀 Getting Started
 
@@ -225,11 +305,19 @@ Change the game's visual style and background:
    - Play any game to set high scores
    - View all scores in the Hall of Fame
    - Switch between games easily
+   - **Set up Global Leaderboard** (optional) - See `LEADERBOARD_SETUP.md` for instructions
 
-4. **Snake Customization** (Snake game only)
-   - Select a Skin (Classic, Rainbow, Robot)
-   - Select a Theme (Default, Night, Garden, Space, Retro)
+4. **Customize Your Games**
+   - **Snake**: Select a Skin (Classic, Rainbow, Robot) and Theme (Default, Night, Garden, Space, Retro)
+   - **Breakout**: Choose Difficulty (Easy, Medium, Hard) and Theme (Default, Neon, Ocean)
+   - **Flappy Bird**: Select Difficulty (Easy, Medium, Hard) based on initial speed
+   - **2048**: Choose Theme (Default, Dark, Colorful, Pastel)
    - Settings are saved automatically
+
+5. **Username System**
+   - Username prompt appears when you achieve a high score (if not already set)
+   - Usernames are associated with all your scores
+   - Used for global leaderboard submissions
 
 ## 📁 File Structure
 
@@ -248,9 +336,12 @@ snake_game/
 ├── shared/
 │   ├── nav.js              # Navigation system
 │   ├── storage.js          # Unified storage
+│   ├── username.js         # Username management
 │   └── styles.css          # Shared styles
-├── config.js               # Game configuration
+├── config.js               # Game configuration (includes Supabase config)
+├── leaderboard.js          # Global leaderboard integration
 ├── storage.js              # Snake storage (legacy)
+├── LEADERBOARD_SETUP.md    # Leaderboard setup instructions
 ├── skins.js                # Snake skins
 ├── renderer.js             # Snake rendering
 ├── game-logic.js           # Snake game logic
@@ -268,7 +359,9 @@ snake_game/
 - **HTML5 Canvas** - Game rendering
 - **Vanilla JavaScript** - Game logic (no frameworks)
 - **CSS3** - Styling and animations
-- **localStorage API** - Data persistence
+- **localStorage API** - Local data persistence
+- **Supabase** - Global leaderboard (optional, cloud-based)
+- **Fetch API** - HTTP requests for leaderboard
 - **requestAnimationFrame** - Smooth animations
 
 ### Browser Compatibility
@@ -289,12 +382,24 @@ snake_game/
 
 ## 💾 Data Storage
 
+### Local Storage
 - High scores saved in browser `localStorage`
 - Unified storage system for all games
 - Theme and skin preferences saved automatically
+- Username stored locally
 - Data persists between browser sessions
-- No server or database required
+- No server or database required for local play
 - Automatic migration from legacy formats
+- Top 3 scores per game mode stored locally
+
+### Global Leaderboard (Optional)
+- **Supabase integration** - Cloud-based leaderboard storage
+- **Real-time updates** - See latest scores from all players
+- **Top 3 scores** - Displayed per game mode
+- **Username-based** - Scores associated with usernames
+- **Secure** - Row Level Security (RLS) policies protect data
+- **Free tier** - Supabase free tier is sufficient for most use cases
+- See `LEADERBOARD_SETUP.md` for setup instructions
 
 ## 🌟 Tips & Strategies
 
@@ -304,18 +409,22 @@ snake_game/
 - **Power-Up Mode**: Save Blue Potions for tight spots, use Red Potions when you have space
 
 ### Breakout
-- **Easy**: Great for beginners, larger target area
-- **Medium**: Balanced challenge
-- **Hard**: Fast-paced action, requires quick reflexes
+- **Easy**: Great for beginners, larger target area, 3 lives for more chances
+- **Medium**: Balanced challenge, 2 lives
+- **Hard**: Fast-paced action, requires quick reflexes, only 1 life
 - Aim for corners to maximize bounces
 - Watch ball speed increase as levels progress
+- Game starts when you move the paddle - no need to press start
+- You won't see a popup when losing a life - only when all lives are lost
 
 ### Flappy Bird
 - **Easier start** - Game begins with easier difficulty (bigger gaps, thinner pipes, faster jump)
+- **Difficulty levels** - Adjust initial speed based on your skill level
 - Time your taps carefully - faster jump strength makes control easier
 - Focus on the gap, not the pipes - bigger gaps give you more room
 - Speed increases gradually as you progress - stay focused as difficulty ramps up
 - Take advantage of the easier beginning to build up your score
+- Bird always starts in the center - no position bugs
 
 ### 2048
 - Keep your highest tile in a corner
@@ -325,7 +434,53 @@ snake_game/
 
 ## 📝 Changelog
 
-### Version 3.2 (Current) - Mobile & Gameplay Improvements
+### Version 4.0 (Current) - Global Leaderboard & Enhanced Features
+- **Global Leaderboard System**:
+  - Supabase integration for cloud-based leaderboards
+  - Top 3 scores displayed per game mode
+  - Real-time score updates
+  - Username-based score tracking
+  - Automatic score submission for high scores
+  - Optional feature - games work without it
+- **Username System**:
+  - Username prompt when achieving high scores
+  - Full-length usernames (up to 50 characters)
+  - Usernames associated with all scores
+  - Stored locally in browser
+- **Enhanced Game Over Screens**:
+  - Unified game over menu across all games
+  - Tabbed interface (Overview, High Scores, Global Leaderboard)
+  - Overview tab with "Play Again" and "Back to Menu" options
+  - Submit score button for high scores
+  - Username modal for high score submissions
+- **Breakout Improvements**:
+  - Difficulty-based lives (Easy=3, Medium=2, Hard=1)
+  - Theme customization (Default, Neon, Ocean)
+  - Game starts when paddle moves (no start button needed)
+  - No popup when losing a life (only when all lives are lost)
+  - Ball stops immediately when game over
+  - Improved game state management
+- **Flappy Bird Improvements**:
+  - Difficulty levels (Easy, Medium, Hard) based on initial speed
+  - Bird always starts in center of screen
+  - Fixed bird position bugs on start
+  - Bird stops when game over
+  - Full game over screen with tabs
+  - Improved game state management
+- **2048 Improvements**:
+  - Theme customization (Default, Dark, Colorful, Pastel)
+  - Centered start menu (vertically centered)
+  - Full-screen background coverage
+  - Background stays fixed when playing
+  - Full game over screen with tabs
+- **Unified Game Flow**:
+  - Consistent start/pause/resume flow across all games
+  - Main menu for customization before starting
+  - Pause menu with resume option
+  - Game over screen with play again and back to menu
+  - "Back to Menu" returns to main menu to change settings
+
+### Version 3.2 - Mobile & Gameplay Improvements
 - **Flappy Bird Improvements**:
   - Easier starting difficulty - faster jump strength (-11 vs -8)
   - Thinner pipes (45px vs 60px) for easier navigation

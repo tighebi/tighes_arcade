@@ -27,13 +27,20 @@ const Game2048 = {
         // Load high scores
         if (typeof ArcadeStorage !== 'undefined') {
             this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.GAME2048);
-            this.highScore = this.highScores.length > 0 ? 
-                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+            if (this.highScores.length > 0) {
+                const bestEntry = this.highScores[0];
+                this.highScore = typeof bestEntry === 'number' ? bestEntry : (bestEntry.score || 0);
+            } else {
+                this.highScore = 0;
+            }
             document.getElementById('high-score').textContent = this.highScore;
         }
         
         // Setup theme selector
         this.setupTheme();
+        
+        // Setup main menu
+        this.setupMainMenu();
         
         // Setup controls
         this.setupControls();
@@ -42,7 +49,7 @@ const Game2048 = {
         this.setupGameOverTabs();
         this.setupLeaderboardSubmission();
         
-        // Initialize game
+        // Initialize game (but don't show it yet)
         this.resetGame();
     },
     
@@ -57,6 +64,31 @@ const Game2048 = {
             this.theme = e.target.value;
             this.applyTheme(this.theme);
         });
+    },
+    
+    setupMainMenu() {
+        const startBtn = document.getElementById('start-game-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                // Hide main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.add('hidden');
+                }
+                // Show game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.remove('hidden');
+                }
+                // Show pause menu as "Ready to Play"
+                const pauseMenu = document.getElementById('pause-menu');
+                if (pauseMenu) {
+                    pauseMenu.classList.remove('hidden');
+                    document.getElementById('pause-title').textContent = 'Ready to Play';
+                    document.getElementById('pause-instructions').textContent = 'Use arrow keys or WASD to start';
+                }
+            });
+        }
     },
     
     applyTheme(theme) {
@@ -86,7 +118,18 @@ const Game2048 = {
         
         if (backToMenuBtn) {
             backToMenuBtn.addEventListener('click', () => {
-                window.location.href = '../index.html';
+                // Hide game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                // Show main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.remove('hidden');
+                }
+                // Reset game
+                this.resetGame();
             });
         }
         
@@ -117,8 +160,8 @@ const Game2048 = {
                 // Update active content
                 tabContents.forEach(content => content.classList.remove('active'));
                 
-                if (tab === 'restart') {
-                    document.getElementById('restart-tab').classList.add('active');
+                if (tab === 'overview') {
+                    document.getElementById('overview-tab').classList.add('active');
                 } else if (tab === 'highscores') {
                     document.getElementById('highscores-tab').classList.add('active');
                     this.loadHighScores();
@@ -252,8 +295,18 @@ const Game2048 = {
         }
         
         highScoresList.innerHTML = scores.slice(0, 3).map((scoreEntry, index) => {
-            const score = typeof scoreEntry === 'number' ? scoreEntry : scoreEntry.score;
-            const username = typeof scoreEntry === 'number' ? 'Player' : (scoreEntry.username || 'Player');
+            // Handle both old numeric format and new object format
+            let score, username;
+            if (typeof scoreEntry === 'number') {
+                score = scoreEntry;
+                username = 'Player';
+            } else if (typeof scoreEntry === 'object' && scoreEntry !== null) {
+                score = scoreEntry.score || 0;
+                username = scoreEntry.username || 'Player';
+            } else {
+                score = 0;
+                username = 'Player';
+            }
             const rank = index + 1;
             const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
             return `
@@ -424,7 +477,18 @@ const Game2048 = {
         
         if (menuFromGameOverBtn) {
             menuFromGameOverBtn.addEventListener('click', () => {
-                window.location.href = '../index.html';
+                // Hide game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                // Show main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.remove('hidden');
+                }
+                // Reset game
+                this.resetGame();
             });
         }
         
@@ -801,16 +865,18 @@ const Game2048 = {
             // Check if this is a high score
             let isHighScore = false;
             const oldBestScore = this.highScores.length > 0 ? 
-                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+                (typeof this.highScores[0] === 'number' ? this.highScores[0] : (this.highScores[0].score || 0)) : 0;
             
             // Save high score
             if (typeof ArcadeStorage !== 'undefined') {
                 ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.GAME2048, this.score);
                 this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.GAME2048);
                 const newBestScore = this.highScores.length > 0 ? 
-                    (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+                    (typeof this.highScores[0] === 'number' ? this.highScores[0] : (this.highScores[0].score || 0)) : 0;
                 this.highScore = newBestScore;
-                document.getElementById('high-score').textContent = this.highScore;
+                // Ensure high score is displayed as a number, not object
+                const highScoreDisplay = typeof this.highScore === 'object' ? (this.highScore.score || 0) : this.highScore;
+                document.getElementById('high-score').textContent = highScoreDisplay;
                 
                 // Check if this is a new high score
                 if (this.score > oldBestScore) {
@@ -818,7 +884,15 @@ const Game2048 = {
                 }
             }
             
-            document.getElementById('game-over').classList.remove('hidden');
+            // Hide pause menu and show game over
+            const pauseMenu = document.getElementById('pause-menu');
+            const gameOverEl = document.getElementById('game-over');
+            if (pauseMenu) {
+                pauseMenu.classList.add('hidden');
+            }
+            if (gameOverEl) {
+                gameOverEl.classList.remove('hidden');
+            }
             
             // Show leaderboard submit section if high score and leaderboard available
             const submitSection = document.getElementById('leaderboard-submit-section');
@@ -851,7 +925,8 @@ const Game2048 = {
         
         // Update score display
         document.getElementById('score').textContent = this.score;
-        if (this.score > this.highScore) {
+        const currentHighScore = typeof this.highScore === 'object' ? (this.highScore.score || 0) : this.highScore;
+        if (this.score > currentHighScore) {
             this.highScore = this.score;
             document.getElementById('high-score').textContent = this.highScore;
         }

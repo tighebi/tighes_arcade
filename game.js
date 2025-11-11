@@ -50,24 +50,45 @@ function init() {
     // Apply theme
     applyTheme(gameState.currentTheme);
     
-    // Load high scores (from unified storage)
-    gameState.highScores = Storage.loadHighScores();
-    gameState.powerUpHighScores = Storage.loadPowerUpHighScores();
-    gameState.highScore = gameState.highScores.length > 0 ? gameState.highScores[0] : 0;
-    
-    // Migrate to unified storage if ArcadeStorage is available
+    // Load high scores - prefer ArcadeStorage if available (has usernames)
     if (typeof ArcadeStorage !== 'undefined') {
-        // Ensure scores are synced with ArcadeStorage
-        if (gameState.highScores.length > 0) {
-            gameState.highScores.forEach(score => {
-                ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.SNAKE_CLASSIC, score);
+        // Load from ArcadeStorage (has usernames)
+        gameState.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_CLASSIC);
+        gameState.powerUpHighScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_POWERUP);
+        
+        // Migrate old scores from Storage system if they exist
+        const oldClassicScores = Storage.loadHighScores();
+        const oldPowerUpScores = Storage.loadPowerUpHighScores();
+        
+        if (oldClassicScores.length > 0) {
+            oldClassicScores.forEach(score => {
+                const scoreValue = typeof score === 'number' ? score : (score.score || score);
+                ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.SNAKE_CLASSIC, scoreValue);
             });
+            // Reload after migration
+            gameState.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_CLASSIC);
         }
-        if (gameState.powerUpHighScores.length > 0) {
-            gameState.powerUpHighScores.forEach(score => {
-                ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.SNAKE_POWERUP, score);
+        
+        if (oldPowerUpScores.length > 0) {
+            oldPowerUpScores.forEach(score => {
+                const scoreValue = typeof score === 'number' ? score : (score.score || score);
+                ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.SNAKE_POWERUP, scoreValue);
             });
+            // Reload after migration
+            gameState.powerUpHighScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_POWERUP);
         }
+    } else {
+        // Fallback to old Storage system
+        gameState.highScores = Storage.loadHighScores();
+        gameState.powerUpHighScores = Storage.loadPowerUpHighScores();
+    }
+    
+    // Extract numeric score from first entry (handle both numeric and object formats)
+    if (gameState.highScores.length > 0) {
+        const firstScore = gameState.highScores[0];
+        gameState.highScore = typeof firstScore === 'number' ? firstScore : (firstScore.score || 0);
+    } else {
+        gameState.highScore = 0;
     }
     
     // Setup canvas responsiveness
@@ -295,8 +316,13 @@ function gameOver() {
             gameState.powerUpHighScores = updatedScores;
         } else {
             gameState.highScores = updatedScores;
-            const bestScore = updatedScores.length > 0 ? (typeof updatedScores[0] === 'number' ? updatedScores[0] : updatedScores[0].score) : 0;
-            gameState.highScore = bestScore;
+            // Extract numeric score from first entry (handle both numeric and object formats)
+            if (updatedScores.length > 0) {
+                const firstScore = updatedScores[0];
+                gameState.highScore = typeof firstScore === 'number' ? firstScore : (firstScore.score || 0);
+            } else {
+                gameState.highScore = 0;
+            }
         }
         
         // Update high score displays
@@ -376,9 +402,18 @@ function startGameLoop() {
 function updateHighScoreDisplay() {
     if (gameState.gameMode === 'zen') return;
     
-    const currentHigh = gameState.gameMode === 'powerup' 
-        ? (gameState.powerUpHighScores.length > 0 ? gameState.powerUpHighScores[0] : 0)
-        : gameState.highScore;
+    let currentHigh;
+    if (gameState.gameMode === 'powerup') {
+        if (gameState.powerUpHighScores.length > 0) {
+            const firstScore = gameState.powerUpHighScores[0];
+            currentHigh = typeof firstScore === 'number' ? firstScore : (firstScore.score || 0);
+        } else {
+            currentHigh = 0;
+        }
+    } else {
+        // Extract numeric score (handle both numeric and object formats)
+        currentHigh = typeof gameState.highScore === 'number' ? gameState.highScore : (gameState.highScore.score || 0);
+    }
     
     Controls.updateScore(gameState.score, currentHigh);
 }

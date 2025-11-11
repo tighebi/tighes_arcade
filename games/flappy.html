@@ -16,20 +16,34 @@
         <div class="mouse-follower" id="mouseFollower"></div>
     </div>
     
-    <div class="game-container">
+    <!-- Main Menu -->
+    <div id="main-menu" class="menu-screen">
+        <div class="menu-content">
+            <h1>Flappy Bird</h1>
+            <div class="menu-section">
+                <h2>Customization</h2>
+                <div class="customization-section">
+                    <div class="customization-group">
+                        <label>Difficulty:</label>
+                        <select id="difficulty-selector" tabindex="0">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="menu-btn" id="start-game-btn">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Container (hidden initially) -->
+    <div class="game-container hidden">
         <div class="game-header">
             <h1>Flappy Bird</h1>
             <div class="score-container">
                 <span>Score: <span id="score">0</span></span>
                 <span>High Score: <span id="high-score">0</span></span>
-            </div>
-            <div style="margin-top: 10px;">
-                <label for="difficulty-selector" style="margin-right: 10px; color: #fff; font-weight: bold;">Difficulty:</label>
-                <select id="difficulty-selector">
-                    <option value="easy">Easy</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
             </div>
         </div>
         <canvas id="gameCanvas" width="400" height="600"></canvas>
@@ -39,16 +53,16 @@
                 <h2 id="pause-title">Ready to Play</h2>
                 <p id="pause-instructions" class="pause-instructions">Click or press SPACE to start</p>
                 <button class="menu-btn" id="resume-btn">Play</button>
-                <button class="menu-btn" id="back-to-menu-btn">Back to Arcade</button>
+                <button class="menu-btn" id="back-to-menu-btn">Back to Menu</button>
             </div>
             <!-- Game Over Menu -->
             <div id="game-over" class="game-over hidden">
                 <div class="game-over-tabs">
-                    <button class="tab-button active" data-tab="restart">Restart</button>
+                    <button class="tab-button active" data-tab="overview">Overview</button>
                     <button class="tab-button" data-tab="highscores" id="highscores-tab-btn">High Scores</button>
                     <button class="tab-button" data-tab="leaderboard" id="leaderboard-tab-btn">Global Leaderboard</button>
                 </div>
-                <div id="restart-tab" class="tab-content active">
+                <div id="overview-tab" class="tab-content active">
                     <h2>Game Over!</h2>
                     <p>Final Score: <span id="final-score">0</span></p>
                     <div id="leaderboard-submit-section" class="leaderboard-submit-section hidden">
@@ -56,7 +70,7 @@
                         <button class="menu-btn" id="submit-score-btn">Submit Score to Leaderboard</button>
                     </div>
                     <button class="menu-btn" id="play-again-btn">Play Again</button>
-                    <button class="menu-btn" id="menu-from-gameover-btn">Back to Arcade</button>
+                    <button class="menu-btn" id="menu-from-gameover-btn">Back to Menu</button>
                 </div>
                 <div id="highscores-tab" class="tab-content">
                     <h2 id="highscores-title">High Scores</h2>

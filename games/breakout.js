@@ -12,6 +12,7 @@ const BreakoutGame = {
     gameRunning: false,
     gameStarted: false,
     gamePaused: false,
+    gameOver: false,
     animationId: null,
     difficulty: 'medium',
     theme: 'default',
@@ -33,7 +34,8 @@ const BreakoutGame = {
             rows: 4,
             cols: 8,
             brickWidth: 65,
-            brickHeight: 25
+            brickHeight: 25,
+            lives: 3
         },
         medium: {
             paddleWidth: 100,
@@ -41,7 +43,8 @@ const BreakoutGame = {
             rows: 5,
             cols: 10,
             brickWidth: 55,
-            brickHeight: 20
+            brickHeight: 20,
+            lives: 2
         },
         hard: {
             paddleWidth: 80,
@@ -49,7 +52,8 @@ const BreakoutGame = {
             rows: 7,
             cols: 12,
             brickWidth: 45,
-            brickHeight: 18
+            brickHeight: 18,
+            lives: 1
         }
     },
     
@@ -104,14 +108,21 @@ const BreakoutGame = {
         // Load high scores
         if (typeof ArcadeStorage !== 'undefined') {
             this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.BREAKOUT);
-            this.highScore = this.highScores.length > 0 ? 
-                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+            if (this.highScores.length > 0) {
+                const bestEntry = this.highScores[0];
+                this.highScore = typeof bestEntry === 'number' ? bestEntry : (bestEntry.score || 0);
+            } else {
+                this.highScore = 0;
+            }
             document.getElementById('high-score').textContent = this.highScore;
         }
         
         // Setup difficulty and theme selectors
         this.setupDifficulty();
         this.setupTheme();
+        
+        // Setup main menu
+        this.setupMainMenu();
         
         // Setup event listeners
         this.setupControls();
@@ -120,7 +131,7 @@ const BreakoutGame = {
         this.setupGameOverTabs();
         this.setupLeaderboardSubmission();
         
-        // Initialize game
+        // Initialize game (but don't show it yet)
         this.resetGame();
         
         // Start game loop
@@ -132,14 +143,38 @@ const BreakoutGame = {
         if (!selector) return;
         
         selector.addEventListener('change', (e) => {
-            if (!this.gameStarted) {
-                this.difficulty = e.target.value;
-                this.applyDifficulty();
-                this.resetGame();
-            }
+            this.difficulty = e.target.value;
+            this.applyDifficulty();
         });
         
         this.applyDifficulty();
+    },
+    
+    setupMainMenu() {
+        const startBtn = document.getElementById('start-game-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                // Hide main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.add('hidden');
+                }
+                // Show game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.remove('hidden');
+                }
+                // Show pause menu as "Ready to Play"
+                const pauseMenu = document.getElementById('pause-menu');
+                if (pauseMenu) {
+                    pauseMenu.classList.remove('hidden');
+                    document.getElementById('pause-title').textContent = 'Ready to Play';
+                    document.getElementById('pause-instructions').textContent = 'Click or press SPACE to start';
+                }
+                // Apply theme and create bricks
+                this.createBricks();
+            });
+        }
     },
     
     applyDifficulty() {
@@ -151,6 +186,7 @@ const BreakoutGame = {
         this.cols = diff.cols;
         this.brickWidth = diff.brickWidth;
         this.brickHeight = diff.brickHeight;
+        this.lives = diff.lives || 3; // Set lives based on difficulty
         
         // Recalculate brick layout
         const totalBrickWidth = this.cols * this.brickWidth + (this.cols - 1) * this.brickPadding;
@@ -162,11 +198,7 @@ const BreakoutGame = {
         if (!selector) return;
         
         selector.addEventListener('change', (e) => {
-            if (!this.gameStarted) {
-                this.theme = e.target.value;
-                this.createBricks();
-                this.resetGame();
-            }
+            this.theme = e.target.value;
         });
     },
     
@@ -187,7 +219,18 @@ const BreakoutGame = {
         
         if (backToMenuBtn) {
             backToMenuBtn.addEventListener('click', () => {
-                window.location.href = '../index.html';
+                // Hide game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                // Show main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.remove('hidden');
+                }
+                // Reset game
+                this.resetGame();
             });
         }
         
@@ -218,8 +261,8 @@ const BreakoutGame = {
                 // Update active content
                 tabContents.forEach(content => content.classList.remove('active'));
                 
-                if (tab === 'restart') {
-                    document.getElementById('restart-tab').classList.add('active');
+                if (tab === 'overview') {
+                    document.getElementById('overview-tab').classList.add('active');
                 } else if (tab === 'highscores') {
                     document.getElementById('highscores-tab').classList.add('active');
                     this.loadHighScores();
@@ -264,7 +307,7 @@ const BreakoutGame = {
         
         try {
             const username = UsernameManager.getUsername();
-            const nameString = String(username).trim().substring(0, 3).toUpperCase();
+            const nameString = String(username).trim(); // Use full username, no truncation
             const scoreNumber = Number(this.score);
             
             const result = await Leaderboard.submitScore(
@@ -353,8 +396,18 @@ const BreakoutGame = {
         }
         
         highScoresList.innerHTML = scores.slice(0, 3).map((scoreEntry, index) => {
-            const score = typeof scoreEntry === 'number' ? scoreEntry : scoreEntry.score;
-            const username = typeof scoreEntry === 'number' ? 'Player' : (scoreEntry.username || 'Player');
+            // Handle both old numeric format and new object format
+            let score, username;
+            if (typeof scoreEntry === 'number') {
+                score = scoreEntry;
+                username = 'Player';
+            } else if (typeof scoreEntry === 'object' && scoreEntry !== null) {
+                score = scoreEntry.score || 0;
+                username = scoreEntry.username || 'Player';
+            } else {
+                score = 0;
+                username = 'Player';
+            }
             const rank = index + 1;
             const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
             return `
@@ -383,12 +436,26 @@ const BreakoutGame = {
     
     resetGame() {
         this.score = 0;
-        this.lives = 3;
+        this.gameOver = false; // Reset game over flag
         this.gameRunning = false;
         this.gameStarted = false;
         this.gamePaused = false;
         this.level = 1;
         this.framesSinceStart = 0;
+        
+        // Apply difficulty to set lives
+        this.applyDifficulty();
+        
+        // Reload high scores to ensure we have the latest
+        if (typeof ArcadeStorage !== 'undefined') {
+            this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.BREAKOUT);
+            if (this.highScores.length > 0) {
+                const bestEntry = this.highScores[0];
+                this.highScore = typeof bestEntry === 'number' ? bestEntry : (bestEntry.score || 0);
+            } else {
+                this.highScore = 0;
+            }
+        }
         
         // Apply difficulty settings
         this.applyDifficulty();
@@ -408,12 +475,23 @@ const BreakoutGame = {
         this.createBricks();
         
         // Update UI
-        document.getElementById('score').textContent = this.score;
-        document.getElementById('lives').textContent = this.lives;
-        document.getElementById('game-over').classList.add('hidden');
-        document.getElementById('pause-menu').classList.remove('hidden');
-        document.getElementById('pause-title').textContent = 'Ready to Play';
-        document.getElementById('pause-instructions').textContent = 'Click or press SPACE to start';
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const highScoreEl = document.getElementById('high-score');
+        const gameOverEl = document.getElementById('game-over');
+        const pauseMenuEl = document.getElementById('pause-menu');
+        
+        if (scoreEl) scoreEl.textContent = this.score;
+        if (livesEl) livesEl.textContent = this.lives;
+        if (highScoreEl) highScoreEl.textContent = this.highScore;
+        if (gameOverEl) gameOverEl.classList.add('hidden');
+        if (pauseMenuEl) {
+            pauseMenuEl.classList.remove('hidden');
+            const pauseTitle = document.getElementById('pause-title');
+            const pauseInstructions = document.getElementById('pause-instructions');
+            if (pauseTitle) pauseTitle.textContent = 'Ready to Play';
+            if (pauseInstructions) pauseInstructions.textContent = 'Click or press SPACE to start';
+        }
     },
     
     createBricks() {
@@ -444,7 +522,13 @@ const BreakoutGame = {
             // Calculate actual canvas coordinates accounting for scaling
             const scaleX = this.canvas.width / rect.width;
             mouseX = (e.clientX - rect.left) * scaleX;
-            if (this.gameRunning) {
+            
+            // Start game when paddle moves for the first time
+            if (!this.gameStarted && !this.gameOver) {
+                this.startGame();
+            }
+            
+            if (this.gameRunning && !this.gameOver) {
                 this.paddle.x = mouseX - this.paddle.width / 2;
                 this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
             }
@@ -452,9 +536,21 @@ const BreakoutGame = {
         
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
-            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
-            if (e.key === ' ' && !this.gameStarted) {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                keys.left = true;
+                // Start game when arrow key is pressed for the first time
+                if (!this.gameStarted && !this.gameOver) {
+                    this.startGame();
+                }
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                keys.right = true;
+                // Start game when arrow key is pressed for the first time
+                if (!this.gameStarted && !this.gameOver) {
+                    this.startGame();
+                }
+            }
+            if (e.key === ' ' && !this.gameStarted && !this.gameOver) {
                 this.startGame();
             }
         });
@@ -476,7 +572,12 @@ const BreakoutGame = {
             // Get touch position relative to canvas
             const touchX = (touch.clientX - rect.left) * scaleX;
             
-            if (this.gameRunning) {
+            // Start game when touch moves paddle for the first time
+            if (!this.gameStarted && !this.gameOver) {
+                this.startGame();
+            }
+            
+            if (this.gameRunning && !this.gameOver) {
                 // Center paddle on touch position
                 this.paddle.x = touchX - this.paddle.width / 2;
                 this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
@@ -555,7 +656,12 @@ const BreakoutGame = {
         
         // Update paddle position based on keys
         setInterval(() => {
-            if (this.gameRunning && !this.gamePaused) {
+            // Start game when arrow key moves paddle for the first time
+            if ((keys.left || keys.right) && !this.gameStarted && !this.gameOver) {
+                this.startGame();
+            }
+            
+            if (this.gameRunning && !this.gamePaused && !this.gameOver) {
                 if (keys.left) {
                     this.paddle.x = Math.max(0, this.paddle.x - this.paddle.speed);
                 }
@@ -578,7 +684,18 @@ const BreakoutGame = {
         
         if (menuFromGameOverBtn) {
             menuFromGameOverBtn.addEventListener('click', () => {
-                window.location.href = '../index.html';
+                // Hide game container
+                const gameContainer = document.querySelector('.game-container');
+                if (gameContainer) {
+                    gameContainer.classList.add('hidden');
+                }
+                // Show main menu
+                const mainMenu = document.getElementById('main-menu');
+                if (mainMenu) {
+                    mainMenu.classList.remove('hidden');
+                }
+                // Reset game
+                this.resetGame();
             });
         }
     },
@@ -598,6 +715,8 @@ const BreakoutGame = {
     },
     
     update() {
+        // Don't update if game is over
+        if (this.gameOver) return;
         if (!this.gameRunning || !this.gameStarted || this.gamePaused) return;
         
         this.framesSinceStart++;
@@ -727,12 +846,13 @@ const BreakoutGame = {
         // Ball out of bounds (bottom)
         if (this.ball.y > this.canvas.height) {
             this.lives--;
-            document.getElementById('lives').textContent = this.lives;
+            const livesEl = document.getElementById('lives');
+            if (livesEl) livesEl.textContent = this.lives;
             
             if (this.lives <= 0) {
                 this.gameOver();
             } else {
-                // Reset ball
+                // Reset ball silently (no popup) - just pause the game
                 this.ball.x = this.paddle.x + this.paddle.width / 2;
                 this.ball.y = this.paddle.y - this.ball.radius - 5;
                 this.ball.dx = 0;
@@ -742,16 +862,17 @@ const BreakoutGame = {
                 this.gameRunning = false;
                 this.gameStarted = false;
                 this.gamePaused = false;
-                document.getElementById('pause-menu').classList.remove('hidden');
-                document.getElementById('pause-title').textContent = 'Continue';
-                document.getElementById('pause-instructions').textContent = 'Click or press SPACE to continue';
+                // Don't show pause menu - just wait for player to click/space to continue
             }
         }
         
-        // Update high score
-        if (this.score > this.highScore) {
-            this.highScore = this.score;
-            document.getElementById('high-score').textContent = this.highScore;
+        // Update high score display (compare numeric values)
+        const currentHighScore = typeof this.highScore === 'object' ? (this.highScore.score || 0) : this.highScore;
+        if (this.score > currentHighScore) {
+            const highScoreEl = document.getElementById('high-score');
+            if (highScoreEl) {
+                highScoreEl.textContent = this.score;
+            }
         }
     },
     
@@ -784,21 +905,26 @@ const BreakoutGame = {
     },
     
     gameOver() {
+        this.gameOver = true; // Set game over flag to prevent ball movement
         this.gameRunning = false;
         this.gameStarted = false;
         this.gamePaused = false;
         
+        // Stop the ball immediately
+        this.ball.dx = 0;
+        this.ball.dy = 0;
+        
         // Check if this is a high score
         let isHighScore = false;
         const oldBestScore = this.highScores.length > 0 ? 
-            (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+            (typeof this.highScores[0] === 'number' ? this.highScores[0] : (this.highScores[0].score || 0)) : 0;
         
         // Save high score
         if (typeof ArcadeStorage !== 'undefined') {
             ArcadeStorage.saveHighScore(ArcadeStorage.GAMES.BREAKOUT, this.score);
             this.highScores = ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.BREAKOUT);
             const newBestScore = this.highScores.length > 0 ? 
-                (typeof this.highScores[0] === 'number' ? this.highScores[0] : this.highScores[0].score) : 0;
+                (typeof this.highScores[0] === 'number' ? this.highScores[0] : (this.highScores[0].score || 0)) : 0;
             this.highScore = newBestScore;
             
             // Check if this is a new high score
@@ -807,9 +933,28 @@ const BreakoutGame = {
             }
         }
         
-        document.getElementById('final-score').textContent = this.score;
-        document.getElementById('high-score').textContent = this.highScore;
-        document.getElementById('game-over').classList.remove('hidden');
+        // Update final score display
+        const finalScoreEl = document.getElementById('final-score');
+        if (finalScoreEl) {
+            finalScoreEl.textContent = this.score;
+        }
+        
+        // Ensure high score is displayed as a number, not object
+        const highScoreDisplay = typeof this.highScore === 'object' ? (this.highScore.score || 0) : this.highScore;
+        const highScoreEl = document.getElementById('high-score');
+        if (highScoreEl) {
+            highScoreEl.textContent = highScoreDisplay;
+        }
+        
+        // Hide pause menu and show game over
+        const pauseMenu = document.getElementById('pause-menu');
+        const gameOverEl = document.getElementById('game-over');
+        if (pauseMenu) {
+            pauseMenu.classList.add('hidden');
+        }
+        if (gameOverEl) {
+            gameOverEl.classList.remove('hidden');
+        }
         
         // Show leaderboard submit section if high score and leaderboard available
         const submitSection = document.getElementById('leaderboard-submit-section');

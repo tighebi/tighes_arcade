@@ -5,10 +5,21 @@ const Storage = {
     loadHighScores() {
         // Try ArcadeStorage first, then fallback to legacy
         if (typeof ArcadeStorage !== 'undefined') {
-            return ArcadeStorage.loadHighScores(ArcadeStorage.GAMES.SNAKE_CLASSIC);
+            return ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_CLASSIC);
         }
         const saved = localStorage.getItem('snakeHighScores');
-        return saved ? JSON.parse(saved).sort((a, b) => b - a) : [];
+        if (!saved) return [];
+        try {
+            const scores = JSON.parse(saved);
+            // Handle both numeric arrays and object arrays
+            return Array.isArray(scores) ? scores.sort((a, b) => {
+                const scoreA = typeof a === 'number' ? a : (a.score || 0);
+                const scoreB = typeof b === 'number' ? b : (b.score || 0);
+                return scoreB - scoreA;
+            }) : [];
+        } catch (e) {
+            return [];
+        }
     },
     
     saveHighScores(scores) {
@@ -18,10 +29,21 @@ const Storage = {
     loadPowerUpHighScores() {
         // Try ArcadeStorage first, then fallback to legacy
         if (typeof ArcadeStorage !== 'undefined') {
-            return ArcadeStorage.loadHighScores(ArcadeStorage.GAMES.SNAKE_POWERUP);
+            return ArcadeStorage.getAllScoresForGame(ArcadeStorage.GAMES.SNAKE_POWERUP);
         }
         const saved = localStorage.getItem('snakePowerUpHighScores');
-        return saved ? JSON.parse(saved).sort((a, b) => b - a) : [];
+        if (!saved) return [];
+        try {
+            const scores = JSON.parse(saved);
+            // Handle both numeric arrays and object arrays
+            return Array.isArray(scores) ? scores.sort((a, b) => {
+                const scoreA = typeof a === 'number' ? a : (a.score || 0);
+                const scoreB = typeof b === 'number' ? b : (b.score || 0);
+                return scoreB - scoreA;
+            }) : [];
+        } catch (e) {
+            return [];
+        }
     },
     
     savePowerUpHighScores(scores) {
@@ -48,25 +70,41 @@ const Storage = {
     // Update high scores (adds new score if high enough, keeps top 10)
     // Also saves to ArcadeStorage if available
     updateHighScores(newScore, isPowerUp = false) {
+        // Always use ArcadeStorage if available (has usernames)
+        if (typeof ArcadeStorage !== 'undefined') {
+            const gameId = isPowerUp 
+                ? ArcadeStorage.GAMES.SNAKE_POWERUP 
+                : ArcadeStorage.GAMES.SNAKE_CLASSIC;
+            
+            // Save to ArcadeStorage (this handles sorting and limiting)
+            ArcadeStorage.saveHighScore(gameId, newScore);
+            
+            // Return normalized scores from ArcadeStorage
+            return ArcadeStorage.getAllScoresForGame(gameId);
+        }
+        
+        // Fallback to old Storage system
         const key = isPowerUp ? 'snakePowerUpHighScores' : 'snakeHighScores';
         const loadFunc = isPowerUp ? this.loadPowerUpHighScores : this.loadHighScores;
         const saveFunc = isPowerUp ? this.savePowerUpHighScores : this.saveHighScores;
         
         let scores = loadFunc.call(this);
         
-        if (scores.length < 10 || newScore > scores[scores.length - 1]) {
+        // Extract numeric scores for comparison
+        const numericScores = scores.map(s => typeof s === 'number' ? s : (s.score || 0));
+        const minScore = numericScores.length > 0 ? Math.min(...numericScores) : 0;
+        
+        if (scores.length < 10 || newScore > minScore) {
+            // Add new score as number (for old storage system)
             scores.push(newScore);
-            scores.sort((a, b) => b - a);
+            // Sort by numeric value
+            scores.sort((a, b) => {
+                const scoreA = typeof a === 'number' ? a : (a.score || 0);
+                const scoreB = typeof b === 'number' ? b : (b.score || 0);
+                return scoreB - scoreA;
+            });
             scores = scores.slice(0, 10);
             saveFunc.call(this, scores);
-            
-            // Also save to ArcadeStorage if available
-            if (typeof ArcadeStorage !== 'undefined') {
-                const gameId = isPowerUp 
-                    ? ArcadeStorage.GAMES.SNAKE_POWERUP 
-                    : ArcadeStorage.GAMES.SNAKE_CLASSIC;
-                ArcadeStorage.saveHighScore(gameId, newScore);
-            }
         }
         
         return scores;

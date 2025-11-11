@@ -42,10 +42,16 @@ const ArcadeStorage = {
         const key = `arcade_${gameId}_scores`;
         let scores = this.loadHighScores(gameId);
         
+        // Get username - ensure we always have a valid username
+        let username = this.getCurrentUsername();
+        if (!username || username.trim().length === 0) {
+            username = 'Player';
+        }
+        
         // Create score entry with username
         const scoreEntry = {
-            username: this.getCurrentUsername(),
-            score: score,
+            username: username.trim(),
+            score: Number(score), // Ensure score is a number
             date: new Date().toISOString()
         };
         
@@ -53,13 +59,14 @@ const ArcadeStorage = {
         
         // Sort by score descending
         scores.sort((a, b) => {
-            const scoreA = typeof a === 'number' ? a : a.score;
-            const scoreB = typeof b === 'number' ? b : b.score;
+            const scoreA = typeof a === 'number' ? a : (a.score || 0);
+            const scoreB = typeof b === 'number' ? b : (b.score || 0);
             return scoreB - scoreA;
         });
         
         scores = scores.slice(0, 3); // Keep top 3
         
+        // Save raw scores (not normalized) to localStorage
         localStorage.setItem(key, JSON.stringify(scores));
         return scores;
     },
@@ -70,9 +77,15 @@ const ArcadeStorage = {
         const saved = localStorage.getItem(key);
         if (!saved) return [];
         
-        const scores = JSON.parse(saved);
-        // Normalize all entries (migrate old numeric scores)
-        return scores.map(entry => this.normalizeScoreEntry(entry));
+        try {
+            const scores = JSON.parse(saved);
+            if (!Array.isArray(scores)) return [];
+            // Normalize all entries (migrate old numeric scores for display)
+            return scores.map(entry => this.normalizeScoreEntry(entry));
+        } catch (e) {
+            console.error('Error loading scores:', e);
+            return [];
+        }
     },
     
     // Get best score for a game (returns numeric score for backward compatibility)
