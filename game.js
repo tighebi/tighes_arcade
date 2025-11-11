@@ -94,6 +94,9 @@ function init() {
         },
         onBackToMenu: () => Menu.showMainMenu()
     });
+    
+    // Setup leaderboard submission
+    Menu.setupLeaderboardSubmission();
     Menu.setupCustomization({
         onSkinChange: (skin) => {
             gameState.currentSkin = skin;
@@ -120,6 +123,9 @@ function init() {
             } else {
                 Menu.updateHighScoreDisplayList(gameState.highScores);
             }
+        },
+        onLeaderboardLoad: () => {
+            Menu.loadGlobalLeaderboard(gameState.gameMode);
         }
     });
     
@@ -281,7 +287,7 @@ function gameOver() {
         updateHighScoreDisplay();
     }
     
-    Menu.showGameOver(gameState.score);
+    Menu.showGameOver(gameState.score, gameState.gameMode);
 }
 
 // Optimized game loop using requestAnimationFrame

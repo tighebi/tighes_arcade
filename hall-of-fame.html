@@ -57,14 +57,60 @@
             justify-content: space-between;
             align-items: center;
         }
-        .score-item:first-child {
+        .score-item-best {
             background: rgba(255, 215, 0, 0.2);
             font-weight: bold;
+        }
+        .score-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .score-rank {
+            font-weight: bold;
+            min-width: 30px;
+        }
+        .score-username {
+            color: #4ecdc4;
+            font-weight: 500;
+        }
+        .score-value {
+            font-weight: bold;
+            color: #ffd93d;
         }
         .no-scores {
             text-align: center;
             opacity: 0.7;
             padding: 20px;
+        }
+        .username-display {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .username-display span {
+            font-size: 1.2em;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .change-username-btn {
+            padding: 8px 16px;
+            background: rgba(78, 205, 196, 0.2);
+            border: 2px solid #4ecdc4;
+            border-radius: 5px;
+            color: #4ecdc4;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .change-username-btn:hover {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: #6ef0f0;
+            transform: translateY(-2px);
         }
         @media (max-width: 768px) {
             .scores-grid {
@@ -89,6 +135,10 @@
         <div class="hall-header">
             <h1>🏆 Hall of Fame</h1>
             <p>Your Personal Best Scores Across All Games</p>
+            <div class="username-display">
+                <span id="current-username-display">Player</span>
+                <button id="change-username-btn" class="change-username-btn">Change Username</button>
+            </div>
         </div>
         
         <div class="scores-grid" id="scores-grid">
@@ -96,29 +146,12 @@
         </div>
     </div>
     
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <p class="footer-text">Questions or concerns?</p>
-                <a href="mailto:tigheb@bu.edu" class="footer-link">tigheb@bu.edu</a>
-            </div>
-            <div class="footer-divider"></div>
-            <div class="footer-section">
-                <p class="footer-credit">Made by <span class="footer-name">Tighe Billings</span></p>
-                <p class="footer-copyright">© 2025 All rights reserved</p>
-            </div>
-            <div class="footer-divider"></div>
-            <div class="footer-section">
-                <p class="footer-sponsor">Sponsored by</p>
-                <p class="footer-sponsor-name">Boston University</p>
-            </div>
-        </div>
-    </footer>
+    <script src="shared/username.js"></script>
     <script src="shared/storage.js"></script>
     <script src="background.js"></script>
     <script src="shared/nav.js"></script>
     <script>
-        // Display all high scores
+        // Display all high scores with usernames
         function displayHallOfFame() {
             const scoresGrid = document.getElementById('scores-grid');
             if (!scoresGrid || typeof ArcadeStorage === 'undefined') return;
@@ -132,23 +165,33 @@
             ];
             
             scoresGrid.innerHTML = games.map(game => {
-                const scores = ArcadeStorage.loadHighScores(game.id);
-                const bestScore = scores.length > 0 ? scores[0] : null;
+                const scores = ArcadeStorage.getAllScoresForGame(game.id);
+                const bestScoreEntry = scores.length > 0 ? scores[0] : null;
                 
                 return `
                     <div class="score-card">
                         <h2>${game.icon} ${game.name.split(' ').slice(1).join(' ')}</h2>
-                        ${bestScore !== null ? `
-                            <div class="score-item">
-                                <span>🥇 Best Score</span>
-                                <span>${bestScore}</span>
-                            </div>
-                            ${scores.slice(1, 5).map((score, index) => `
-                                <div class="score-item">
-                                    <span>${index + 2}.</span>
-                                    <span>${score}</span>
+                        ${bestScoreEntry !== null ? `
+                            <div class="score-item score-item-best">
+                                <div class="score-item-left">
+                                    <span class="score-rank">🥇</span>
+                                    <span class="score-username">${bestScoreEntry.username || 'Player'}</span>
                                 </div>
-                            `).join('')}
+                                <span class="score-value">${bestScoreEntry.score || bestScoreEntry}</span>
+                            </div>
+                            ${scores.slice(1, 5).map((scoreEntry, index) => {
+                                const score = typeof scoreEntry === 'number' ? scoreEntry : scoreEntry.score;
+                                const username = typeof scoreEntry === 'number' ? 'Player' : (scoreEntry.username || 'Player');
+                                return `
+                                    <div class="score-item">
+                                        <div class="score-item-left">
+                                            <span class="score-rank">${index + 2}.</span>
+                                            <span class="score-username">${username}</span>
+                                        </div>
+                                        <span class="score-value">${score}</span>
+                                    </div>
+                                `;
+                            }).join('')}
                         ` : `
                             <div class="no-scores">No scores yet!<br>Play to set your first record!</div>
                         `}
@@ -157,7 +200,35 @@
             }).join('');
         }
         
-        window.addEventListener('load', displayHallOfFame);
+        // Update username display
+        function updateUsernameDisplay() {
+            if (typeof UsernameManager !== 'undefined') {
+                const usernameDisplay = document.getElementById('current-username-display');
+                if (usernameDisplay) {
+                    usernameDisplay.textContent = UsernameManager.getUsername();
+                }
+            }
+        }
+        
+        // Setup change username button
+        function setupUsernameChange() {
+            const changeBtn = document.getElementById('change-username-btn');
+            if (changeBtn && typeof UsernameManager !== 'undefined') {
+                changeBtn.addEventListener('click', () => {
+                    UsernameManager.showUsernameModal((username) => {
+                        updateUsernameDisplay();
+                        // Refresh the hall of fame display to show updated username
+                        displayHallOfFame();
+                    });
+                });
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            displayHallOfFame();
+            updateUsernameDisplay();
+            setupUsernameChange();
+        });
     </script>
 </body>
 </html>

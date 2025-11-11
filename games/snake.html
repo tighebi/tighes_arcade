@@ -76,10 +76,17 @@
                 <div class="game-over-tabs">
                     <button class="tab-button active" data-tab="restart">Restart</button>
                     <button class="tab-button" data-tab="highscores" id="highscores-tab-btn">High Scores</button>
+                    <button class="tab-button" data-tab="leaderboard" id="leaderboard-tab-btn">Global Leaderboard</button>
                 </div>
                 <div id="restart-tab" class="tab-content active">
                     <h2>Game Over!</h2>
                     <p>Final Score: <span id="final-score">0</span></p>
+                    <div id="leaderboard-submit-section" class="leaderboard-submit-section hidden">
+                        <label for="player-initials">Enter your initials (3 letters):</label>
+                        <input type="text" id="player-initials" maxlength="3" placeholder="ABC" class="initials-input">
+                        <button class="menu-btn" id="submit-score-btn">Submit Score</button>
+                        <p id="submit-status" class="submit-status"></p>
+                    </div>
                     <button class="menu-btn" id="play-again-btn">Play Again</button>
                     <button class="menu-btn" id="menu-from-gameover-btn">Back to Menu</button>
                 </div>
@@ -90,6 +97,12 @@
                 <div id="powerup-highscores-tab" class="tab-content">
                     <h2>Power-Up High Scores</h2>
                     <div id="powerup-high-scores-list"></div>
+                </div>
+                <div id="leaderboard-tab" class="tab-content">
+                    <h2 id="leaderboard-title">Global Leaderboard</h2>
+                    <div id="global-leaderboard-list" class="global-leaderboard-list">
+                        <p style="text-align: center; opacity: 0.7;">Loading leaderboard...</p>
+                    </div>
                 </div>
             </div>
             <div class="instructions">
@@ -128,9 +141,12 @@
             </div>
         </div>
     </footer>
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../shared/storage.js"></script>
     <script src="../config.js"></script>
     <script src="../storage.js"></script>
+    <script src="../leaderboard.js"></script>
     <script src="../skins.js"></script>
     <script src="../renderer.js"></script>
     <script src="../game-logic.js"></script>

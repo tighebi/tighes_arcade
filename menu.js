@@ -13,8 +13,18 @@ const Menu = {
         menuFromGameOverBtn: null,
         highScoreContainer: null,
         highscoresBtn: null,
-        finalScore: null
+        finalScore: null,
+        leaderboardSubmitSection: null,
+        playerInitialsInput: null,
+        submitScoreBtn: null,
+        submitStatus: null,
+        globalLeaderboardList: null,
+        leaderboardTabBtn: null
     },
+    
+    // Current game state for leaderboard
+    currentGameScore: 0,
+    currentGameMode: 'classic',
     
     init() {
         // Cache all menu elements
@@ -31,6 +41,17 @@ const Menu = {
         this.elements.highScoreContainer = document.getElementById('high-score-container');
         this.elements.highscoresBtn = document.getElementById('highscores-tab-btn');
         this.elements.finalScore = document.getElementById('final-score');
+        this.elements.leaderboardSubmitSection = document.getElementById('leaderboard-submit-section');
+        this.elements.playerInitialsInput = document.getElementById('player-initials');
+        this.elements.submitScoreBtn = document.getElementById('submit-score-btn');
+        this.elements.submitStatus = document.getElementById('submit-status');
+        this.elements.globalLeaderboardList = document.getElementById('global-leaderboard-list');
+        this.elements.leaderboardTabBtn = document.getElementById('leaderboard-tab-btn');
+        
+        // Initialize leaderboard if available
+        if (typeof Leaderboard !== 'undefined') {
+            Leaderboard.init();
+        }
     },
     
     showMainMenu() {
@@ -240,7 +261,7 @@ const Menu = {
         }).join('');
     },
     
-    showGameOver(finalScore) {
+    showGameOver(finalScore, gameMode = 'classic') {
         if (this.elements.finalScore) {
             this.elements.finalScore.textContent = finalScore;
         }
@@ -248,6 +269,165 @@ const Menu = {
             this.elements.gameOver.classList.remove('hidden');
         }
         this.hidePauseMenu();
+        
+        // Store current game state for leaderboard
+        this.currentGameScore = finalScore;
+        this.currentGameMode = gameMode;
+        
+        // Show leaderboard submit section if leaderboard is available and not in zen mode
+        if (typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable() && gameMode !== 'zen') {
+            if (this.elements.leaderboardSubmitSection) {
+                this.elements.leaderboardSubmitSection.classList.remove('hidden');
+            }
+            if (this.elements.playerInitialsInput) {
+                this.elements.playerInitialsInput.value = '';
+                this.elements.playerInitialsInput.focus();
+            }
+            if (this.elements.submitStatus) {
+                this.elements.submitStatus.textContent = '';
+            }
+        } else {
+            if (this.elements.leaderboardSubmitSection) {
+                this.elements.leaderboardSubmitSection.classList.add('hidden');
+            }
+        }
+        
+        // Hide leaderboard tab if not available
+        if (this.elements.leaderboardTabBtn) {
+            if (typeof Leaderboard === 'undefined' || !Leaderboard.isAvailable()) {
+                this.elements.leaderboardTabBtn.style.display = 'none';
+            } else {
+                this.elements.leaderboardTabBtn.style.display = '';
+            }
+        }
+    },
+    
+    // Setup leaderboard submission
+    setupLeaderboardSubmission() {
+        if (!this.elements.submitScoreBtn || !this.elements.playerInitialsInput) return;
+        
+        // Submit on button click
+        this.elements.submitScoreBtn.addEventListener('click', () => {
+            this.submitScoreToLeaderboard();
+        });
+        
+        // Submit on Enter key
+        this.elements.playerInitialsInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.submitScoreToLeaderboard();
+            }
+        });
+        
+        // Only allow letters
+        this.elements.playerInitialsInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+        });
+    },
+    
+    // Submit score to global leaderboard
+    async submitScoreToLeaderboard() {
+        if (!this.elements.playerInitialsInput || !this.elements.submitStatus) return;
+        
+        const initials = this.elements.playerInitialsInput.value.trim();
+        
+        if (initials.length === 0) {
+            this.elements.submitStatus.textContent = 'Please enter your initials';
+            this.elements.submitStatus.style.color = '#ff4757';
+            return;
+        }
+        
+        if (typeof Leaderboard === 'undefined' || !Leaderboard.isAvailable()) {
+            this.elements.submitStatus.textContent = 'Leaderboard not available';
+            this.elements.submitStatus.style.color = '#ff4757';
+            return;
+        }
+        
+        // Disable input and button while submitting
+        this.elements.playerInitialsInput.disabled = true;
+        this.elements.submitScoreBtn.disabled = true;
+        this.elements.submitStatus.textContent = 'Submitting...';
+        this.elements.submitStatus.style.color = '#fff';
+        
+        try {
+            const result = await Leaderboard.submitScore(
+                initials,
+                this.currentGameScore,
+                this.currentGameMode
+            );
+            
+            if (result.success) {
+                this.elements.submitStatus.textContent = 'Score submitted successfully! 🎉';
+                this.elements.submitStatus.style.color = '#51cf66';
+                // Refresh leaderboard if it's currently displayed
+                if (document.getElementById('leaderboard-tab') && 
+                    document.getElementById('leaderboard-tab').classList.contains('active')) {
+                    this.loadGlobalLeaderboard(this.currentGameMode);
+                }
+            } else {
+                this.elements.submitStatus.textContent = `Error: ${result.error || 'Failed to submit score'}`;
+                this.elements.submitStatus.style.color = '#ff4757';
+                // Re-enable input and button on error
+                this.elements.playerInitialsInput.disabled = false;
+                this.elements.submitScoreBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error submitting score:', error);
+            this.elements.submitStatus.textContent = 'Error submitting score. Please try again.';
+            this.elements.submitStatus.style.color = '#ff4757';
+            // Re-enable input and button on error
+            this.elements.playerInitialsInput.disabled = false;
+            this.elements.submitScoreBtn.disabled = false;
+        }
+    },
+    
+    // Load and display global leaderboard
+    async loadGlobalLeaderboard(gameMode = 'classic') {
+        if (!this.elements.globalLeaderboardList) return;
+        
+        // Update leaderboard title based on game mode
+        const leaderboardTitle = document.getElementById('leaderboard-title');
+        if (leaderboardTitle) {
+            if (gameMode === 'powerup') {
+                leaderboardTitle.textContent = 'Global Leaderboard - Power-Up Mode';
+            } else {
+                leaderboardTitle.textContent = 'Global Leaderboard - Classic Mode';
+            }
+        }
+        
+        if (typeof Leaderboard === 'undefined' || !Leaderboard.isAvailable()) {
+            this.elements.globalLeaderboardList.innerHTML = 
+                '<p style="text-align: center; opacity: 0.7;">Leaderboard not available. Please configure Supabase.</p>';
+            return;
+        }
+        
+        this.elements.globalLeaderboardList.innerHTML = 
+            '<p style="text-align: center; opacity: 0.7;">Loading leaderboard...</p>';
+        
+        try {
+            const result = await Leaderboard.getLeaderboard(gameMode, 10);
+            
+            if (result.success && result.scores && result.scores.length > 0) {
+                this.elements.globalLeaderboardList.innerHTML = result.scores.map((entry, index) => {
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    const date = new Date(entry.created_at);
+                    const dateStr = date.toLocaleDateString();
+                    return `
+                        <div class="high-score-item global-leaderboard-item">
+                            <span><span class="rank">${index + 1}.</span> ${medal} <strong>${entry.name}</strong></span>
+                            <span class="score">${entry.score} pts</span>
+                            <span class="leaderboard-date">${dateStr}</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                this.elements.globalLeaderboardList.innerHTML = 
+                    '<p style="text-align: center; opacity: 0.7;">No scores yet. Be the first to submit!</p>';
+            }
+        } catch (error) {
+            console.error('Error loading leaderboard:', error);
+            this.elements.globalLeaderboardList.innerHTML = 
+                '<p style="text-align: center; opacity: 0.7; color: #ff4757;">Error loading leaderboard. Please try again.</p>';
+        }
     },
     
     setupTabs(callbacks) {
@@ -268,6 +448,15 @@ const Menu = {
                 
                 if (tabName === 'highscores' && callbacks.onHighScores) {
                     callbacks.onHighScores();
+                } else if (tabName === 'leaderboard') {
+                    const targetTab = document.getElementById(`${tabName}-tab`);
+                    if (targetTab) {
+                        targetTab.classList.add('active');
+                    }
+                    // Load leaderboard when tab is clicked
+                    if (callbacks.onLeaderboardLoad) {
+                        callbacks.onLeaderboardLoad();
+                    }
                 } else {
                     const targetTab = document.getElementById(`${tabName}-tab`);
                     if (targetTab) {

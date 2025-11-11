@@ -79,3 +79,20 @@ const POTION_EFFECTS = {
     }
 };
 
+// Supabase Configuration for Global Leaderboard
+// To enable the leaderboard:
+// 1. Create a free account at https://supabase.com
+// 2. Create a new project
+// 3. Go to SQL Editor and run this SQL to create the table:
+//    CREATE TABLE snake_leaderboard (
+//        id BIGSERIAL PRIMARY KEY,
+//        name VARCHAR(3) NOT NULL,
+//        score INTEGER NOT NULL,
+//        game_mode VARCHAR(20) NOT NULL,
+//        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+//    );
+// 4. Go to Settings > API and copy your Project URL and anon public key
+// 5. Replace the values below with your Supabase credentials
+CONFIG.SUPABASE_URL = 'https://uuztspmqpxcwxhkvktfc.supabase.co'; // Your Supabase project URL
+CONFIG.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1enRzcG1xcHhjd3hoa3ZrdGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NzM4NjAsImV4cCI6MjA3ODQ0OTg2MH0.sZfedkAg1rXRH4KPzDV3yCmIYexA5MohKB4Wkiacdag'; // Your Supabase anon/public key
+
