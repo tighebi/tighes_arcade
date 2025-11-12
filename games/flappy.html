@@ -25,19 +25,19 @@
                 <div class="customization-section">
                     <div class="customization-group">
                         <label>Difficulty:</label>
-                        <select id="difficulty-selector" tabindex="0">
-                            <option value="easy">Easy</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
+                        <button class="theme-selector-btn" id="difficulty-selector-btn">
+                            <span id="difficulty-selector-text">Medium</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="preview-grid dropdown-style hidden" id="difficulty-preview-grid"></div>
                     </div>
                     <div class="customization-group">
                         <label>Theme:</label>
-                        <select id="theme-selector" tabindex="0">
-                            <option value="default" selected>Default</option>
-                            <option value="day">Day</option>
-                            <option value="night">Night</option>
-                        </select>
+                        <button class="theme-selector-btn" id="theme-selector-btn">
+                            <span id="theme-selector-text">Day</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="preview-grid dropdown-style hidden" id="theme-preview-grid"></div>
                     </div>
                 </div>
             </div>
@@ -122,9 +122,151 @@
     <script src="../config.js"></script>
     <script src="../leaderboard.js"></script>
     <script src="../shared/username.js"></script>
+    <script src="../preview-generator.js"></script>
     <script src="flappy.js"></script>
     <script src="../background.js"></script>
     <script src="../shared/nav.js"></script>
+    <script>
+        // Initialize preview cards for Flappy Bird
+        function initFlappyPreviewCards() {
+            const game = window.FlappyGame;
+            if (!game) {
+                setTimeout(initFlappyPreviewCards, 100);
+                return;
+            }
+            
+            const currentTheme = game.theme || 'day'; // Default to 'day' instead of 'default'
+            const currentDifficulty = game.difficulty || 'medium';
+            
+            // Get all elements first
+            const themeGrid = document.getElementById('theme-preview-grid');
+            const themeBtn = document.getElementById('theme-selector-btn');
+            const difficultyGrid = document.getElementById('difficulty-preview-grid');
+            const difficultyBtn = document.getElementById('difficulty-selector-btn');
+            
+            if (!themeGrid || !themeBtn || !difficultyGrid || !difficultyBtn) {
+                console.error('Missing required elements for preview cards');
+                return;
+            }
+            
+            // Theme setup
+            if (themeGrid && themeBtn) {
+                const themeText = document.getElementById('theme-selector-text');
+                if (themeText) themeText.textContent = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+                
+                // Create theme cards immediately (no default theme)
+                const themes = ['day', 'night'];
+                themes.forEach(theme => {
+                    const card = document.createElement('div');
+                    card.className = `preview-card ${theme === currentTheme ? 'selected' : ''}`;
+                    card.dataset.theme = theme;
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    PreviewGenerator.generateFlappyThemePreview(theme, canvas);
+                    
+                    const label = document.createElement('div');
+                    label.className = 'preview-card-label';
+                    label.textContent = theme;
+                    
+                    card.appendChild(canvas);
+                    card.appendChild(label);
+                    card.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('#theme-preview-grid .preview-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        game.theme = theme;
+                        game.applyTheme(theme);
+                        if (themeText) themeText.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+                        try {
+                            if (typeof Storage !== 'undefined' && Storage.saveTheme) {
+                                Storage.saveTheme(theme);
+                            }
+                        } catch (e) {
+                            console.log('Storage not available for theme');
+                        }
+                        themeGrid.classList.add('hidden');
+                        themeBtn.classList.remove('active');
+                    });
+                    themeGrid.appendChild(card);
+                });
+                
+                // Toggle dropdown
+                themeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    themeGrid.classList.toggle('hidden');
+                    themeBtn.classList.toggle('active');
+                    // Close difficulty dropdown if open
+                    if (difficultyGrid) difficultyGrid.classList.add('hidden');
+                    if (difficultyBtn) difficultyBtn.classList.remove('active');
+                });
+            }
+            
+            // Difficulty setup
+            if (difficultyGrid && difficultyBtn) {
+                const difficultyText = document.getElementById('difficulty-selector-text');
+                if (difficultyText) difficultyText.textContent = currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+                
+                // Create difficulty cards immediately
+                const difficulties = ['easy', 'medium', 'hard'];
+                difficulties.forEach(diff => {
+                    const card = document.createElement('div');
+                    card.className = `preview-card ${diff === currentDifficulty ? 'selected' : ''}`;
+                    card.dataset.difficulty = diff;
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    PreviewGenerator.generateFlappyDifficultyPreview(diff, canvas, currentTheme);
+                    
+                    const label = document.createElement('div');
+                    label.className = 'preview-card-label';
+                    label.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+                    
+                    card.appendChild(canvas);
+                    card.appendChild(label);
+                    card.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('#difficulty-preview-grid .preview-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        game.difficulty = diff;
+                        game.applyDifficulty();
+                        if (difficultyText) difficultyText.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+                        difficultyGrid.classList.add('hidden');
+                        difficultyBtn.classList.remove('active');
+                    });
+                    difficultyGrid.appendChild(card);
+                });
+                
+                // Toggle dropdown
+                difficultyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    difficultyGrid.classList.toggle('hidden');
+                    difficultyBtn.classList.toggle('active');
+                    // Close theme dropdown if open
+                    if (themeGrid) themeGrid.classList.add('hidden');
+                    if (themeBtn) themeBtn.classList.remove('active');
+                });
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (themeGrid && !themeGrid.contains(e.target) && themeBtn && !themeBtn.contains(e.target)) {
+                    themeGrid.classList.add('hidden');
+                    themeBtn.classList.remove('active');
+                }
+                if (difficultyGrid && !difficultyGrid.contains(e.target) && difficultyBtn && !difficultyBtn.contains(e.target)) {
+                    difficultyGrid.classList.add('hidden');
+                    difficultyBtn.classList.remove('active');
+                }
+            });
+        }
+        
+        window.addEventListener('load', () => {
+            setTimeout(initFlappyPreviewCards, 100);
+        });
+    </script>
 </body>
 </html>
 

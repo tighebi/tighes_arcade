@@ -111,7 +111,7 @@ function init() {
     Menu.setupGameOverMenu({
         onPlayAgain: () => {
             GameLogic.resetGame(gameState);
-            Menu.showPauseMenu(false);
+            Menu.hidePauseMenu(); // Hide pause menu - game starts on first direction key press
         },
         onBackToMenu: () => Menu.showMainMenu()
     });
@@ -239,7 +239,7 @@ function selectGameMode(mode) {
     GameLogic.resetGame(gameState);
     Menu.updateHighScoreDisplay(mode, gameState.highScores, gameState.powerUpHighScores);
     Menu.showGame();
-    Menu.showPauseMenu(false);
+    Menu.hidePauseMenu(); // Hide pause menu - game starts on first direction key press
     updateHighScoreDisplay();
 }
 

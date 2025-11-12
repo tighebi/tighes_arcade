@@ -16,6 +16,11 @@
             overflow-x: hidden;
             touch-action: pan-y;
             position: relative;
+            background: transparent !important; /* Allow animated background to show through */
+        }
+        /* Ensure body doesn't cover animated background */
+        body {
+            background: transparent !important;
         }
         #main-menu {
             position: relative;
@@ -28,12 +33,29 @@
             left: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            z-index: 0 !important;
-            pointer-events: auto !important;
+            z-index: 0 !important; /* Base layer - patterns should be visible */
+            pointer-events: auto !important; /* Allow mouse tracking for parallax effect */
+            background: #0a0a1a !important; /* Base background color for patterns to show against */
+        }
+        /* Make all background layers 100% opaque */
+        #animated-bg .bg-layer {
+            opacity: 1 !important;
+        }
+        #animated-bg .bg-pattern-1 {
+            opacity: 1 !important;
+        }
+        #animated-bg .bg-pattern-2 {
+            opacity: 1 !important;
+        }
+        #animated-bg .bg-gradient {
+            opacity: 1 !important;
+        }
+        #animated-bg .bg-particles {
+            opacity: 1 !important;
         }
         .game-container {
             position: relative;
-            z-index: 1;
+            z-index: 1; /* Above background - but transparent so patterns show through */
             width: 100%;
             min-height: 100vh;
             display: flex;
@@ -41,6 +63,11 @@
             justify-content: flex-start;
             align-items: center;
             padding-top: 20px;
+            pointer-events: none; /* Allow mouse events to pass through to background */
+            background: transparent !important; /* Allow animated background to show through */
+        }
+        .game-container > * {
+            pointer-events: auto; /* Re-enable pointer events for game elements */
         }
         #game2048 {
             max-width: 500px;
@@ -169,10 +196,10 @@
 </head>
 <body class="game-page">
     <div id="animated-bg">
+        <div class="bg-layer bg-particles"></div>
+        <div class="bg-layer bg-gradient"></div>
         <div class="bg-layer bg-pattern-1" id="pattern1"></div>
         <div class="bg-layer bg-pattern-2" id="pattern2"></div>
-        <div class="bg-layer bg-gradient"></div>
-        <div class="bg-layer bg-particles"></div>
         <div class="mouse-follower" id="mouseFollower"></div>
     </div>
     
@@ -183,14 +210,13 @@
             <div class="menu-section">
                 <h2>Customization</h2>
                 <div class="customization-section">
-                    <div class="customization-group">
+                    <div class="customization-group" style="position: relative;">
                         <label>Theme:</label>
-                        <select id="theme-selector" tabindex="0">
-                            <option value="default" selected>Default</option>
-                            <option value="dark">Dark</option>
-                            <option value="colorful">Colorful</option>
-                            <option value="pastel">Pastel</option>
-                        </select>
+                        <button class="theme-selector-btn" id="theme-selector-btn">
+                            <span id="theme-selector-text">Default</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="preview-grid dropdown-style hidden" id="theme-preview-grid"></div>
                     </div>
                 </div>
             </div>
@@ -283,9 +309,92 @@
     <script src="../config.js"></script>
     <script src="../leaderboard.js"></script>
     <script src="../shared/username.js"></script>
+    <script src="../preview-generator.js"></script>
     <script src="2048.js"></script>
     <script src="../background.js"></script>
     <script src="../shared/nav.js"></script>
+    <script>
+        // Initialize preview cards for 2048
+        function init2048PreviewCards() {
+            const game = window.game2048;
+            if (!game) {
+                // Retry if game not ready
+                setTimeout(init2048PreviewCards, 100);
+                return;
+            }
+            
+            const currentTheme = game.theme || 'default';
+            const themeGrid = document.getElementById('theme-preview-grid');
+            const themeBtn = document.getElementById('theme-selector-btn');
+            if (!themeGrid || !themeBtn) {
+                console.error('Theme grid or button not found');
+                return;
+            }
+            
+            // Update button text
+            const themeText = document.getElementById('theme-selector-text');
+            const themeNames = {
+                'default': 'Default',
+                'dark': 'Dark',
+                'colorful': 'Colorful',
+                'pastel': 'Pastel'
+            };
+            if (themeText) {
+                themeText.textContent = themeNames[currentTheme] || currentTheme;
+            }
+            
+            // Create theme cards immediately (like Snake game)
+            const themes = ['default', 'dark', 'colorful', 'pastel'];
+            themes.forEach(theme => {
+                const card = document.createElement('div');
+                card.className = `preview-card ${theme === currentTheme ? 'selected' : ''}`;
+                card.dataset.theme = theme;
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 200;
+                PreviewGenerator.generate2048ThemePreview(theme, canvas);
+                
+                const label = document.createElement('div');
+                label.className = 'preview-card-label';
+                label.textContent = themeNames[theme] || theme;
+                
+                card.appendChild(canvas);
+                card.appendChild(label);
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('#theme-preview-grid .preview-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    game.theme = theme;
+                    game.applyTheme(theme);
+                    if (themeText) themeText.textContent = themeNames[theme] || theme;
+                    // Hide dropdown after selection
+                    themeGrid.classList.add('hidden');
+                    themeBtn.classList.remove('active');
+                });
+                themeGrid.appendChild(card);
+            });
+            
+            // Toggle dropdown
+            themeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                themeGrid.classList.toggle('hidden');
+                themeBtn.classList.toggle('active');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!themeGrid.contains(e.target) && !themeBtn.contains(e.target)) {
+                    themeGrid.classList.add('hidden');
+                    themeBtn.classList.remove('active');
+                }
+            });
+        }
+        
+        window.addEventListener('load', () => {
+            setTimeout(init2048PreviewCards, 200);
+        });
+    </script>
 </body>
 </html>
 

@@ -32,21 +32,19 @@
                 <div class="customization-section">
                     <div class="customization-group">
                         <label>Skin:</label>
-                        <select id="skin-selector" tabindex="0">
-                            <option value="classic">Classic</option>
-                            <option value="rainbow">Rainbow</option>
-                            <option value="robot">Robot</option>
-                        </select>
+                        <button class="theme-selector-btn" id="skin-selector-btn">
+                            <span id="skin-selector-text">Classic</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="preview-grid dropdown-style hidden" id="skin-preview-grid"></div>
                     </div>
                     <div class="customization-group">
                         <label>Theme:</label>
-                        <select id="theme-selector" tabindex="0">
-                            <option value="default">Default</option>
-                            <option value="night">Night Mode</option>
-                            <option value="garden">Garden</option>
-                            <option value="space">Space</option>
-                            <option value="retro">Retro LCD</option>
-                        </select>
+                        <button class="theme-selector-btn" id="theme-selector-btn">
+                            <span id="theme-selector-text">Default</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="preview-grid dropdown-style hidden" id="theme-preview-grid"></div>
                     </div>
                 </div>
             </div>
@@ -150,9 +148,169 @@
     <script src="../game-logic.js"></script>
     <script src="../controls.js"></script>
     <script src="../menu.js"></script>
+    <script src="../preview-generator.js"></script>
     <script src="../game.js"></script>
     <script src="../background.js"></script>
     <script src="../shared/nav.js"></script>
+    <script>
+        // Initialize preview cards
+        function initPreviewCards() {
+            const currentSkin = Storage.loadSkin() || 'classic';
+            const currentTheme = Storage.loadTheme() || 'default';
+            
+            const skinGrid = document.getElementById('skin-preview-grid');
+            const skinBtn = document.getElementById('skin-selector-btn');
+            const themeGrid = document.getElementById('theme-preview-grid');
+            const themeBtn = document.getElementById('theme-selector-btn');
+            
+            // Update button texts
+            const skinText = document.getElementById('skin-selector-text');
+            const themeText = document.getElementById('theme-selector-text');
+            if (skinText) skinText.textContent = currentSkin.charAt(0).toUpperCase() + currentSkin.slice(1);
+            if (themeText) {
+                const themeNames = {
+                    'default': 'Default',
+                    'night': 'Night Mode',
+                    'garden': 'Garden',
+                    'space': 'Space',
+                    'retro': 'Retro LCD'
+                };
+                themeText.textContent = themeNames[currentTheme] || currentTheme;
+            }
+            
+            // Setup skin dropdown
+            if (skinBtn) {
+                skinBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    skinGrid.classList.toggle('hidden');
+                    skinBtn.classList.toggle('active');
+                    // Close theme dropdown if open
+                    if (themeGrid) themeGrid.classList.add('hidden');
+                    if (themeBtn) themeBtn.classList.remove('active');
+                });
+            }
+            
+            // Setup theme dropdown
+            if (themeBtn) {
+                themeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    themeGrid.classList.toggle('hidden');
+                    themeBtn.classList.toggle('active');
+                    // Close skin dropdown if open
+                    if (skinGrid) skinGrid.classList.add('hidden');
+                    if (skinBtn) skinBtn.classList.remove('active');
+                });
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (skinGrid && !skinGrid.contains(e.target) && skinBtn && !skinBtn.contains(e.target)) {
+                    skinGrid.classList.add('hidden');
+                    skinBtn.classList.remove('active');
+                }
+                if (themeGrid && !themeGrid.contains(e.target) && themeBtn && !themeBtn.contains(e.target)) {
+                    themeGrid.classList.add('hidden');
+                    themeBtn.classList.remove('active');
+                }
+            });
+            
+            // Skin previews
+            const skins = ['classic', 'rainbow', 'robot'];
+            skins.forEach(skin => {
+                const card = document.createElement('div');
+                card.className = `preview-card ${skin === currentSkin ? 'selected' : ''}`;
+                card.dataset.skin = skin;
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 200;
+                PreviewGenerator.generateSnakeSkinPreview(skin, currentTheme, canvas);
+                
+                const label = document.createElement('div');
+                label.className = 'preview-card-label';
+                label.textContent = skin;
+                
+                card.appendChild(canvas);
+                card.appendChild(label);
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('#skin-preview-grid .preview-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    gameState.currentSkin = skin;
+                    Storage.saveSkin(skin);
+                    gameState.skin = Skins.createSkin(skin, gameState.currentTheme);
+                    if (skinText) skinText.textContent = skin.charAt(0).toUpperCase() + skin.slice(1);
+                    // Regenerate all skin previews with new theme
+                    document.querySelectorAll('#skin-preview-grid .preview-card').forEach(c => {
+                        const s = c.dataset.skin;
+                        const canvas = c.querySelector('canvas');
+                        PreviewGenerator.generateSnakeSkinPreview(s, currentTheme, canvas);
+                    });
+                    // Hide dropdown
+                    skinGrid.classList.add('hidden');
+                    skinBtn.classList.remove('active');
+                });
+                skinGrid.appendChild(card);
+            });
+            
+            // Theme previews
+            const themes = ['default', 'night', 'garden', 'space', 'retro'];
+            themes.forEach(theme => {
+                const card = document.createElement('div');
+                card.className = `preview-card ${theme === currentTheme ? 'selected' : ''}`;
+                card.dataset.theme = theme;
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 200;
+                PreviewGenerator.generateSnakeThemePreview(theme, canvas);
+                
+                const label = document.createElement('div');
+                label.className = 'preview-card-label';
+                label.textContent = theme === 'night' ? 'Night Mode' : theme === 'space' ? 'Space' : theme === 'retro' ? 'Retro LCD' : theme;
+                
+                card.appendChild(canvas);
+                card.appendChild(label);
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('#theme-preview-grid .preview-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    gameState.currentTheme = theme;
+                    Storage.saveTheme(theme);
+                    applyTheme(theme);
+                    Renderer.updateGridCache(theme);
+                    gameState.skin = Skins.createSkin(gameState.currentSkin, theme);
+                    const themeNames = {
+                        'default': 'Default',
+                        'night': 'Night Mode',
+                        'garden': 'Garden',
+                        'space': 'Space',
+                        'retro': 'Retro LCD'
+                    };
+                    if (themeText) themeText.textContent = themeNames[theme] || theme;
+                    // Regenerate all previews with new theme
+                    document.querySelectorAll('#skin-preview-grid .preview-card').forEach(c => {
+                        const s = c.dataset.skin;
+                        const canvas = c.querySelector('canvas');
+                        PreviewGenerator.generateSnakeSkinPreview(s, theme, canvas);
+                    });
+                    document.querySelectorAll('#theme-preview-grid .preview-card').forEach(c => {
+                        const t = c.dataset.theme;
+                        const canvas = c.querySelector('canvas');
+                        PreviewGenerator.generateSnakeThemePreview(t, canvas);
+                    });
+                    // Hide dropdown
+                    themeGrid.classList.add('hidden');
+                    themeBtn.classList.remove('active');
+                });
+                themeGrid.appendChild(card);
+            });
+        }
+        
+        // Initialize previews when page loads
+        window.addEventListener('load', () => {
+            // Wait for game.js to initialize
+            setTimeout(initPreviewCards, 100);
+        });
+    </script>
     <script>
         // Update menu "Back to Menu" to go to arcade home
         window.addEventListener('load', () => {

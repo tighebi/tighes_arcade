@@ -20,7 +20,7 @@ const FlappyGame = {
     frameCount: 0,
     speedIncreaseRate: 0.003,
     difficulty: 'medium',
-    theme: 'default',
+    theme: 'day',
     difficulties: {
         easy: {
             baseSpeed: 2.0,
@@ -87,14 +87,7 @@ const FlappyGame = {
     },
     
     setupDifficulty() {
-        const selector = document.getElementById('difficulty-selector');
-        if (!selector) return;
-        
-        selector.addEventListener('change', (e) => {
-            this.difficulty = e.target.value;
-            this.applyDifficulty();
-        });
-        
+        // Difficulty selection is now handled by preview cards in HTML
         this.applyDifficulty();
     },
     
@@ -112,12 +105,10 @@ const FlappyGame = {
                 if (gameContainer) {
                     gameContainer.classList.remove('hidden');
                 }
-                // Show pause menu as "Ready to Play"
+                // Hide pause menu - game starts on first space press
                 const pauseMenu = document.getElementById('pause-menu');
                 if (pauseMenu) {
-                    pauseMenu.classList.remove('hidden');
-                    document.getElementById('pause-title').textContent = 'Ready to Play';
-                    document.getElementById('pause-instructions').textContent = 'Click or press SPACE to start';
+                    pauseMenu.classList.add('hidden');
                 }
             });
         }
@@ -133,16 +124,17 @@ const FlappyGame = {
     },
     
     setupTheme() {
-        const selector = document.getElementById('theme-selector');
-        if (!selector) return;
-        
+        // Theme selection is now handled by preview cards in HTML
         // Load saved theme - check for Storage in parent scope
         try {
             if (typeof Storage !== 'undefined' && Storage.loadTheme) {
                 const savedTheme = Storage.loadTheme();
-                if (savedTheme && (savedTheme === 'default' || savedTheme === 'day' || savedTheme === 'night')) {
+                if (savedTheme && (savedTheme === 'day' || savedTheme === 'night')) {
                     this.theme = savedTheme;
-                    selector.value = savedTheme;
+                } else if (savedTheme === 'default') {
+                    // Migrate old 'default' theme to 'day'
+                    this.theme = 'day';
+                    Storage.saveTheme('day');
                 }
             }
         } catch (e) {
@@ -152,29 +144,13 @@ const FlappyGame = {
         
         // Apply initial theme
         this.applyTheme(this.theme);
-        
-        selector.addEventListener('change', (e) => {
-            this.theme = e.target.value;
-            this.applyTheme(this.theme);
-            // Save theme
-            try {
-                if (typeof Storage !== 'undefined' && Storage.saveTheme) {
-                    Storage.saveTheme(this.theme);
-                }
-            } catch (e) {
-                // Storage not available, skip saving
-                console.log('Storage not available for theme');
-            }
-        });
     },
     
     applyTheme(theme) {
         // Remove all theme classes
         document.body.className = document.body.className.replace(/theme-\w+/g, '');
-        // Add new theme class
-        if (theme !== 'default') {
-            document.body.classList.add(`theme-${theme}`);
-        }
+        // Add new theme class (always add, no 'default' theme)
+        document.body.classList.add(`theme-${theme}`);
     },
     
     setupPauseMenu() {
@@ -424,12 +400,9 @@ const FlappyGame = {
         
         if (scoreEl) scoreEl.textContent = this.score;
         if (gameOverEl) gameOverEl.classList.add('hidden');
+        // Hide pause menu - game starts on first space press
         if (pauseMenuEl) {
-            pauseMenuEl.classList.remove('hidden');
-            const pauseTitle = document.getElementById('pause-title');
-            const pauseInstructions = document.getElementById('pause-instructions');
-            if (pauseTitle) pauseTitle.textContent = 'Ready to Play';
-            if (pauseInstructions) pauseInstructions.textContent = 'Click or press SPACE to start';
+            pauseMenuEl.classList.add('hidden');
         }
     },
     
@@ -672,13 +645,8 @@ const FlappyGame = {
             pauseMenu.classList.add('hidden');
         }
         
-        // Hide game container instructions
-        if (gameContainer) {
-            const instructions = gameContainer.querySelector('.instructions');
-            if (instructions) {
-                instructions.style.display = 'none';
-            }
-        }
+        // Keep instructions visible but they'll be covered by game over screen
+        // Don't hide them to prevent layout issues
         
         // ALWAYS show game over screen - this is critical!
         if (gameOverEl) {
@@ -700,14 +668,15 @@ const FlappyGame = {
         const submitStatus = document.getElementById('submit-status');
         
         if (isHighScore && typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable()) {
-            if (typeof UsernameManager !== 'undefined' && !UsernameManager.hasUsernameSet()) {
-                // Show username prompt modal
+            // Always show username prompt when high score is achieved
+            if (typeof UsernameManager !== 'undefined') {
+                // Show username prompt modal (allows setting or updating username)
                 UsernameManager.showUsernameModal((username) => {
                     // After username is set, automatically submit score
                     this.submitScoreToLeaderboard();
                 });
             } else {
-                // Username is set, show submit section
+                // UsernameManager not available, show submit section
                 if (submitSection) {
                     submitSection.classList.remove('hidden');
                 }
@@ -916,6 +885,9 @@ const FlappyGame = {
         this.animationId = requestAnimationFrame(() => this.gameLoop());
     }
 };
+
+// Expose to window for preview cards
+window.FlappyGame = FlappyGame;
 
 // Initialize when page loads
 window.addEventListener('load', () => FlappyGame.init());

@@ -54,16 +54,9 @@ const Game2048 = {
     },
     
     setupTheme() {
-        const selector = document.getElementById('theme-selector');
-        if (!selector) return;
-        
+        // Theme selection is now handled by preview cards in HTML
         // Apply initial theme
         this.applyTheme(this.theme);
-        
-        selector.addEventListener('change', (e) => {
-            this.theme = e.target.value;
-            this.applyTheme(this.theme);
-        });
     },
     
     setupMainMenu() {
@@ -80,12 +73,10 @@ const Game2048 = {
                 if (gameContainer) {
                     gameContainer.classList.remove('hidden');
                 }
-                // Show pause menu as "Ready to Play"
+                // Hide pause menu - game starts on first direction key press
                 const pauseMenu = document.getElementById('pause-menu');
                 if (pauseMenu) {
-                    pauseMenu.classList.remove('hidden');
-                    document.getElementById('pause-title').textContent = 'Ready to Play';
-                    document.getElementById('pause-instructions').textContent = 'Use arrow keys or WASD to start';
+                    pauseMenu.classList.add('hidden');
                 }
             });
         }
@@ -100,10 +91,22 @@ const Game2048 = {
             gameContainer.classList.add(`theme-${theme}`);
         }
         
-        // Also apply theme to body for background animation
+        // Apply theme to body for background animation and gradient (like Snake game)
         document.body.className = document.body.className.replace(/theme-\w+/g, '');
         if (theme !== 'default') {
             document.body.classList.add(`theme-${theme}`);
+        }
+        
+        // Update theme selector button text
+        const themeText = document.getElementById('theme-selector-text');
+        if (themeText) {
+            const themeNames = {
+                'default': 'Default',
+                'dark': 'Dark',
+                'colorful': 'Colorful',
+                'pastel': 'Pastel'
+            };
+            themeText.textContent = themeNames[theme] || theme;
         }
     },
     
@@ -129,9 +132,10 @@ const Game2048 = {
             });
         }
         
-        // Pause on P key
+        // Pause on Space key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'p' || e.key === 'P') {
+            if (e.key === ' ') {
+                e.preventDefault();
                 if (this.gameStarted && !this.gameOver && !this.animating && !this.gamePaused) {
                     this.pauseGame();
                 } else if (this.gamePaused) {
@@ -320,7 +324,7 @@ const Game2048 = {
         this.gamePaused = true;
         document.getElementById('pause-menu').classList.remove('hidden');
         document.getElementById('pause-title').textContent = 'Paused';
-        document.getElementById('pause-instructions').textContent = 'Press P or click Play to resume';
+        document.getElementById('pause-instructions').textContent = 'Press SPACE or click Play to resume';
     },
     
     resumeGame() {
@@ -354,9 +358,8 @@ const Game2048 = {
         document.getElementById('score').textContent = this.score;
         document.getElementById('game-over').classList.add('hidden');
         document.getElementById('win-message').classList.add('hidden');
-        document.getElementById('pause-menu').classList.remove('hidden');
-        document.getElementById('pause-title').textContent = 'Ready to Play';
-        document.getElementById('pause-instructions').textContent = 'Use arrow keys or WASD to start';
+        // Hide pause menu - game starts on first direction key press
+        document.getElementById('pause-menu').classList.add('hidden');
     },
     
     addRandomTile() {
@@ -383,7 +386,7 @@ const Game2048 = {
         document.addEventListener('keydown', (e) => {
             if (this.gameOver && !this.won) return;
             if (this.animating) return;
-            if (this.gamePaused && e.key !== 'p' && e.key !== 'P') return;
+            if (this.gamePaused && e.key !== ' ') return; // Allow Space to resume
             
             // Start game on first move
             if (!this.gameStarted) {
@@ -907,14 +910,15 @@ const Game2048 = {
             const submitStatus = document.getElementById('submit-status');
             
             if (isHighScore && typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable()) {
-                if (typeof UsernameManager !== 'undefined' && !UsernameManager.hasUsernameSet()) {
-                    // Show username prompt modal
+                // Always show username prompt when high score is achieved
+                if (typeof UsernameManager !== 'undefined') {
+                    // Show username prompt modal (allows setting or updating username)
                     UsernameManager.showUsernameModal((username) => {
                         // After username is set, automatically submit score
                         this.submitScoreToLeaderboard();
                     });
                 } else {
-                    // Username is set, show submit section
+                    // UsernameManager not available, show submit section
                     if (submitSection) {
                         submitSection.classList.remove('hidden');
                     }

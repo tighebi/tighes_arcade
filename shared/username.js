@@ -87,8 +87,17 @@ const UsernameManager = {
         const note = modal.querySelector('.username-note');
         
         // Update modal content for high score context
+        const currentUsername = this.getUsername();
+        const hasCustomUsername = this.hasCustomUsername();
+        
         if (title) title.textContent = '🎉 High Score!';
-        if (description) description.textContent = 'Enter your username to submit your score to the global leaderboard:';
+        if (description) {
+            if (hasCustomUsername) {
+                description.textContent = 'Update your username (or keep current) to submit your score to the global leaderboard:';
+            } else {
+                description.textContent = 'Enter your username to submit your score to the global leaderboard:';
+            }
+        }
         if (submitBtn) submitBtn.textContent = 'Submit Score';
         if (note) note.textContent = 'Your username will be used for all leaderboard entries';
         

@@ -86,11 +86,11 @@ body.hall-page {
 .bg-gradient {
     background: linear-gradient(
         45deg,
-        rgba(102, 126, 234, 0.2) 0%,
-        rgba(118, 75, 162, 0.2) 25%,
-        rgba(102, 126, 234, 0.2) 50%,
-        rgba(118, 75, 162, 0.2) 75%,
-        rgba(102, 126, 234, 0.2) 100%
+        rgba(135, 206, 235, 0.2) 0%,
+        rgba(176, 224, 230, 0.2) 25%,
+        rgba(135, 206, 235, 0.2) 50%,
+        rgba(176, 224, 230, 0.2) 75%,
+        rgba(135, 206, 235, 0.2) 100%
     );
     background-size: 300% 300%;
     animation: gradientShift 10s ease infinite;
@@ -101,10 +101,10 @@ body.hall-page {
 
 .bg-particles {
     background: 
-        radial-gradient(circle at 20% 50%, rgba(118, 75, 162, 0.4) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.4) 0%, transparent 40%),
-        radial-gradient(circle at 40% 20%, rgba(118, 75, 162, 0.3) 0%, transparent 40%),
-        radial-gradient(circle at 60% 70%, rgba(102, 126, 234, 0.35) 0%, transparent 40%);
+        radial-gradient(circle at 20% 50%, rgba(135, 206, 235, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(176, 224, 230, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(135, 206, 235, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(176, 224, 230, 0.35) 0%, transparent 40%);
     animation: float 15s ease-in-out infinite;
     transition: transform 0.2s ease-out, background 0.5s ease;
     transform-origin: center center;
@@ -756,8 +756,133 @@ body.theme-pastel .bg-particles {
     flex-wrap: wrap;
 }
 
+/* Visual Preview Cards */
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Dropdown-style preview grid - appears on the side */
+.preview-grid.dropdown-style {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 15px;
+    z-index: 10;
+    background: rgba(26, 26, 46, 0.95);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(118, 75, 162, 0.3);
+    max-width: none;
+    min-width: 500px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+/* Adjust for right side of screen */
 .customization-group {
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .preview-grid.dropdown-style {
+        left: auto;
+        right: 0;
+        margin-left: 0;
+        margin-right: 0;
+        min-width: auto;
+        width: calc(100vw - 40px);
+        max-width: 500px;
+    }
+}
+
+.preview-card {
+    position: relative;
+    cursor: pointer;
+    border: 2px solid rgba(118, 75, 162, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: rgba(26, 26, 46, 0.5);
+    aspect-ratio: 1;
+}
+
+.preview-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+    border-color: rgba(118, 75, 162, 0.6);
+}
+
+.preview-card.selected {
+    border-color: #4ecdc4;
+    box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+    border-width: 3px;
+}
+
+.preview-card canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.preview-card-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+/* Dropdown-style theme selector */
+.theme-selector-btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    background: rgba(118, 75, 162, 0.3);
+    border: 1px solid rgba(118, 75, 162, 0.5);
+    color: #fff;
+    cursor: pointer;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 150px;
+    transition: all 0.3s ease;
+}
+
+.theme-selector-btn:hover {
+    background: rgba(118, 75, 162, 0.5);
+    border-color: rgba(118, 75, 162, 0.7);
+    transform: translateY(-1px);
+}
+
+.theme-selector-btn .dropdown-arrow {
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+}
+
+.theme-selector-btn.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.preview-grid.hidden {
+    display: none;
+}
+
+.customization-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 10px;
 }
@@ -766,6 +891,7 @@ body.theme-pastel .bg-particles {
     font-size: 0.9em;
     font-weight: bold;
     color: #fff;
+    margin-bottom: 5px;
 }
 
 /* Base select styling - applies to all select elements */

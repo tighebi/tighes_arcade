@@ -139,14 +139,7 @@ const BreakoutGame = {
     },
     
     setupDifficulty() {
-        const selector = document.getElementById('difficulty-selector');
-        if (!selector) return;
-        
-        selector.addEventListener('change', (e) => {
-            this.difficulty = e.target.value;
-            this.applyDifficulty();
-        });
-        
+        // Difficulty selection is now handled by preview cards in HTML
         this.applyDifficulty();
     },
     
@@ -164,12 +157,10 @@ const BreakoutGame = {
                 if (gameContainer) {
                     gameContainer.classList.remove('hidden');
                 }
-                // Show pause menu as "Ready to Play"
+                // Hide pause menu - game starts on first left/right key press
                 const pauseMenu = document.getElementById('pause-menu');
                 if (pauseMenu) {
-                    pauseMenu.classList.remove('hidden');
-                    document.getElementById('pause-title').textContent = 'Ready to Play';
-                    document.getElementById('pause-instructions').textContent = 'Click or press SPACE to start';
+                    pauseMenu.classList.add('hidden');
                 }
                 // Apply theme and create bricks
                 this.createBricks();
@@ -194,16 +185,9 @@ const BreakoutGame = {
     },
     
     setupTheme() {
-        const selector = document.getElementById('theme-selector');
-        if (!selector) return;
-        
+        // Theme selection is now handled by preview cards in HTML
         // Apply initial theme
         this.applyTheme(this.theme);
-        
-        selector.addEventListener('change', (e) => {
-            this.theme = e.target.value;
-            this.applyTheme(this.theme);
-        });
     },
     
     applyTheme(theme) {
@@ -237,9 +221,10 @@ const BreakoutGame = {
             });
         }
         
-        // Pause on P key
+        // Pause on Space key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'p' || e.key === 'P') {
+            if (e.key === ' ') {
+                e.preventDefault();
                 if (this.gameStarted && this.gameRunning && !this.gamePaused) {
                     this.pauseGame();
                 } else if (this.gamePaused) {
@@ -428,7 +413,7 @@ const BreakoutGame = {
         this.gamePaused = true;
         document.getElementById('pause-menu').classList.remove('hidden');
         document.getElementById('pause-title').textContent = 'Paused';
-        document.getElementById('pause-instructions').textContent = 'Press P or click Play to resume';
+        document.getElementById('pause-instructions').textContent = 'Press SPACE or click Play to resume';
     },
     
     resumeGame() {
@@ -488,12 +473,9 @@ const BreakoutGame = {
         if (livesEl) livesEl.textContent = this.lives;
         if (highScoreEl) highScoreEl.textContent = this.highScore;
         if (gameOverEl) gameOverEl.classList.add('hidden');
+        // Hide pause menu - game starts on first left/right key press
         if (pauseMenuEl) {
-            pauseMenuEl.classList.remove('hidden');
-            const pauseTitle = document.getElementById('pause-title');
-            const pauseInstructions = document.getElementById('pause-instructions');
-            if (pauseTitle) pauseTitle.textContent = 'Ready to Play';
-            if (pauseInstructions) pauseInstructions.textContent = 'Click or press SPACE to start';
+            pauseMenuEl.classList.add('hidden');
         }
     },
     
@@ -516,146 +498,31 @@ const BreakoutGame = {
     },
     
     setupControls() {
-        let mouseX = 0;
         let keys = { left: false, right: false };
         
-        // Mouse controls - account for canvas scaling
-        this.canvas.addEventListener('mousemove', (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            // Calculate actual canvas coordinates accounting for scaling
-            const scaleX = this.canvas.width / rect.width;
-            mouseX = (e.clientX - rect.left) * scaleX;
-            
-            // Start game when paddle moves for the first time
-            if (!this.gameStarted && !this.isGameOver) {
-                this.startGame();
-            }
-            
-            if (this.gameRunning && !this.isGameOver) {
-                this.paddle.x = mouseX - this.paddle.width / 2;
-                this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
-            }
-        });
-        
-        // Keyboard controls
+        // Keyboard controls only - no mouse or touch
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                 keys.left = true;
-                // Start game when arrow key is pressed for the first time
+                // Start game when left/right arrow key is pressed for the first time
                 if (!this.gameStarted && !this.isGameOver) {
                     this.startGame();
                 }
             }
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                 keys.right = true;
-                // Start game when arrow key is pressed for the first time
+                // Start game when left/right arrow key is pressed for the first time
                 if (!this.gameStarted && !this.isGameOver) {
                     this.startGame();
                 }
             }
-            if (e.key === ' ' && !this.gameStarted && !this.isGameOver) {
-                this.startGame();
-            }
+            // Space is now pause only, not launch ball
         });
         
         document.addEventListener('keyup', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
             if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
         });
-        
-        // Touch controls - properly account for canvas scaling on mobile
-        this.canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const rect = this.canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            
-            // Calculate actual canvas coordinates accounting for scaling
-            const scaleX = this.canvas.width / rect.width;
-            
-            // Get touch position relative to canvas
-            const touchX = (touch.clientX - rect.left) * scaleX;
-            
-            // Start game when touch moves paddle for the first time
-            if (!this.gameStarted && !this.isGameOver) {
-                this.startGame();
-            }
-            
-            if (this.gameRunning && !this.isGameOver) {
-                // Center paddle on touch position
-                this.paddle.x = touchX - this.paddle.width / 2;
-                this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
-            }
-        });
-        
-        // Also handle touchstart for immediate response
-        // Start game on any tap/click anywhere in game area
-        const startGameOnTap = (e) => {
-            if (!this.gameStarted) {
-                e.preventDefault();
-                this.startGame();
-                return;
-            }
-        };
-        
-        // Listen for taps/clicks on canvas
-        this.canvas.addEventListener('touchstart', (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            
-            // Start game on first touch if not started
-            if (!this.gameStarted) {
-                e.preventDefault();
-                this.startGame();
-                return;
-            }
-            
-            e.preventDefault();
-            const scaleX = this.canvas.width / rect.width;
-            const touchX = (touch.clientX - rect.left) * scaleX;
-            
-            if (this.gameRunning) {
-                this.paddle.x = touchX - this.paddle.width / 2;
-                this.paddle.x = Math.max(0, Math.min(this.canvas.width - this.paddle.width, this.paddle.x));
-            }
-        });
-        
-        this.canvas.addEventListener('click', startGameOnTap);
-        
-        // Listen for taps/clicks on game container (entire game area)
-        const gameContainer = document.querySelector('.game-container');
-        if (gameContainer) {
-            gameContainer.addEventListener('touchstart', (e) => {
-                if (!this.gameStarted) {
-                    e.preventDefault();
-                    this.startGame();
-                }
-            });
-            gameContainer.addEventListener('click', startGameOnTap);
-        }
-        
-        // Also listen on start prompt specifically
-        const startPrompt = document.getElementById('start-prompt');
-        if (startPrompt) {
-            startPrompt.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (!this.gameStarted) {
-                    this.startGame();
-                }
-            });
-            startPrompt.addEventListener('click', startGameOnTap);
-        }
-        
-        // Listen on game controls area too
-        const gameControls = document.querySelector('.game-controls');
-        if (gameControls) {
-            gameControls.addEventListener('touchstart', (e) => {
-                if (!this.gameStarted) {
-                    e.preventDefault();
-                    this.startGame();
-                }
-            });
-            gameControls.addEventListener('click', startGameOnTap);
-        }
         
         // Update paddle position based on keys
         setInterval(() => {
@@ -893,9 +760,8 @@ const BreakoutGame = {
         this.gameRunning = false;
         this.gameStarted = false;
         this.gamePaused = false;
-        document.getElementById('pause-menu').classList.remove('hidden');
-        document.getElementById('pause-title').textContent = `Level ${this.level} Complete!`;
-        document.getElementById('pause-instructions').textContent = 'Click or press SPACE to continue';
+        // Hide pause menu - game continues on first left/right key press
+        document.getElementById('pause-menu').classList.add('hidden');
     },
     
     endGame() {
@@ -983,14 +849,15 @@ const BreakoutGame = {
         const submitStatus = document.getElementById('submit-status');
         
         if (isHighScore && typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable()) {
-            if (typeof UsernameManager !== 'undefined' && !UsernameManager.hasUsernameSet()) {
-                // Show username prompt modal
+            // Always show username prompt when high score is achieved
+            if (typeof UsernameManager !== 'undefined') {
+                // Show username prompt modal (allows setting or updating username)
                 UsernameManager.showUsernameModal((username) => {
                     // After username is set, automatically submit score
                     this.submitScoreToLeaderboard();
                 });
             } else {
-                // Username is set, show submit section
+                // UsernameManager not available, show submit section
                 if (submitSection) {
                     submitSection.classList.remove('hidden');
                 }
@@ -1093,6 +960,9 @@ const BreakoutGame = {
         this.animationId = requestAnimationFrame(() => this.gameLoop());
     }
 };
+
+// Expose to window for preview cards
+window.BreakoutGame = BreakoutGame;
 
 // Initialize when page loads
 window.addEventListener('load', () => BreakoutGame.init());
