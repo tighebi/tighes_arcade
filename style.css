@@ -322,6 +322,264 @@ body.theme-retro .bg-particles {
         radial-gradient(circle at 60% 70%, rgba(0, 204, 51, 0.35) 0%, transparent 40%);
 }
 
+/* Breakout theme: Neon */
+body.theme-neon .bg-pattern-1 {
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(255, 0, 255, 0.03) 20px,
+            rgba(255, 0, 255, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 20px,
+            rgba(0, 255, 255, 0.03) 20px,
+            rgba(0, 255, 255, 0.03) 40px
+        );
+}
+
+body.theme-neon .bg-pattern-2 {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 0, 255, 0.15) 1px, transparent 0);
+}
+
+body.theme-neon .bg-gradient {
+    background: linear-gradient(
+        45deg,
+        rgba(255, 0, 255, 0.2) 0%,
+        rgba(0, 255, 255, 0.2) 25%,
+        rgba(255, 0, 255, 0.2) 50%,
+        rgba(0, 255, 255, 0.2) 75%,
+        rgba(255, 0, 255, 0.2) 100%
+    );
+}
+
+body.theme-neon .bg-particles {
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 0, 255, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(255, 0, 255, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(0, 255, 255, 0.35) 0%, transparent 40%);
+}
+
+/* Breakout theme: Ocean */
+body.theme-ocean .bg-pattern-1 {
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(0, 116, 217, 0.03) 20px,
+            rgba(0, 116, 217, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 20px,
+            rgba(57, 204, 204, 0.03) 20px,
+            rgba(57, 204, 204, 0.03) 40px
+        );
+}
+
+body.theme-ocean .bg-pattern-2 {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(0, 116, 217, 0.15) 1px, transparent 0);
+}
+
+body.theme-ocean .bg-gradient {
+    background: linear-gradient(
+        45deg,
+        rgba(0, 116, 217, 0.2) 0%,
+        rgba(57, 204, 204, 0.2) 25%,
+        rgba(0, 116, 217, 0.2) 50%,
+        rgba(57, 204, 204, 0.2) 75%,
+        rgba(0, 116, 217, 0.2) 100%
+    );
+}
+
+body.theme-ocean .bg-particles {
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 116, 217, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(57, 204, 204, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(0, 116, 217, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(57, 204, 204, 0.35) 0%, transparent 40%);
+}
+
+/* Breakout theme: Sunset */
+body.theme-sunset .bg-pattern-1 {
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(255, 107, 53, 0.03) 20px,
+            rgba(255, 107, 53, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 20px,
+            rgba(255, 211, 63, 0.03) 20px,
+            rgba(255, 211, 63, 0.03) 40px
+        );
+}
+
+body.theme-sunset .bg-pattern-2 {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 107, 53, 0.15) 1px, transparent 0);
+}
+
+body.theme-sunset .bg-gradient {
+    background: linear-gradient(
+        45deg,
+        rgba(255, 107, 53, 0.2) 0%,
+        rgba(255, 211, 63, 0.2) 25%,
+        rgba(255, 107, 53, 0.2) 50%,
+        rgba(255, 211, 63, 0.2) 75%,
+        rgba(255, 107, 53, 0.2) 100%
+    );
+}
+
+body.theme-sunset .bg-particles {
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255, 211, 63, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(255, 107, 53, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(255, 211, 63, 0.35) 0%, transparent 40%);
+}
+
+/* 2048 theme: Dark */
+body.theme-dark .bg-pattern-1 {
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(74, 144, 226, 0.03) 20px,
+            rgba(74, 144, 226, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 20px,
+            rgba(53, 122, 189, 0.03) 20px,
+            rgba(53, 122, 189, 0.03) 40px
+        );
+}
+
+body.theme-dark .bg-pattern-2 {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(74, 144, 226, 0.15) 1px, transparent 0);
+}
+
+body.theme-dark .bg-gradient {
+    background: linear-gradient(
+        45deg,
+        rgba(26, 26, 46, 0.2) 0%,
+        rgba(22, 33, 62, 0.2) 25%,
+        rgba(26, 26, 46, 0.2) 50%,
+        rgba(22, 33, 62, 0.2) 75%,
+        rgba(26, 26, 46, 0.2) 100%
+    );
+}
+
+body.theme-dark .bg-particles {
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(74, 144, 226, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(53, 122, 189, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(74, 144, 226, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(53, 122, 189, 0.35) 0%, transparent 40%);
+}
+
+/* 2048 theme: Colorful */
+body.theme-colorful .bg-pattern-1 {
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(255, 107, 107, 0.03) 20px,
+            rgba(255, 107, 107, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 20px,
+            rgba(108, 92, 231, 0.03) 20px,
+            rgba(108, 92, 231, 0.03) 40px
+        );
+}
+
+body.theme-colorful .bg-pattern-2 {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 107, 107, 0.15) 1px, transparent 0);
+}
+
+body.theme-colorful .bg-gradient {
+    background: linear-gradient(
+        45deg,
+        rgba(255, 107, 107, 0.2) 0%,
+        rgba(108, 92, 231, 0.2) 25%,
+        rgba(0, 184, 148, 0.2) 50%,
+        rgba(255, 121, 168, 0.2) 75%,
+        rgba(255, 107, 107, 0.2) 100%
+    );
+}
+
+body.theme-colorful .bg-particles {
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(108, 92, 231, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(0, 184, 148, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(255, 121, 168, 0.35) 0%, transparent 40%);
+}
+
+/* 2048 theme: Pastel */
+body.theme-pastel .bg-pattern-1 {
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(255, 243, 205, 0.03) 20px,
+            rgba(255, 243, 205, 0.03) 40px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 20px,
+            rgba(248, 215, 218, 0.03) 20px,
+            rgba(248, 215, 218, 0.03) 40px
+        );
+}
+
+body.theme-pastel .bg-pattern-2 {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255, 243, 205, 0.15) 1px, transparent 0);
+}
+
+body.theme-pastel .bg-gradient {
+    background: linear-gradient(
+        45deg,
+        rgba(255, 243, 205, 0.2) 0%,
+        rgba(248, 215, 218, 0.2) 25%,
+        rgba(209, 236, 241, 0.2) 50%,
+        rgba(212, 237, 218, 0.2) 75%,
+        rgba(255, 243, 205, 0.2) 100%
+    );
+}
+
+body.theme-pastel .bg-particles {
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 243, 205, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(248, 215, 218, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(209, 236, 241, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(212, 237, 218, 0.35) 0%, transparent 40%);
+}
+
 .mouse-follower {
     position: absolute;
     width: 60px;

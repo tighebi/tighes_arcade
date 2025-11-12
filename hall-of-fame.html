@@ -105,7 +105,7 @@
     <div class="hall-of-fame">
         <div class="hall-header">
             <h1>🏆 Hall of Fame</h1>
-            <p>Your Personal Best Scores Across All Games</p>
+            <p>Global Leaderboard - Top Scores Across All Games</p>
         </div>
         
         <div class="scores-grid" id="scores-grid">
@@ -113,54 +113,75 @@
         </div>
     </div>
     
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="leaderboard.js"></script>
     <script src="shared/username.js"></script>
     <script src="shared/storage.js"></script>
     <script src="background.js"></script>
     <script src="shared/nav.js"></script>
     <script>
-        // Display all high scores with usernames
-        function displayHallOfFame() {
+        // Display global leaderboard for all games
+        async function displayHallOfFame() {
             const scoresGrid = document.getElementById('scores-grid');
-            if (!scoresGrid || typeof ArcadeStorage === 'undefined') return;
+            if (!scoresGrid) return;
             
             const games = [
-                { id: ArcadeStorage.GAMES.SNAKE_CLASSIC, name: '🐍 Snake (Classic)', icon: '🐍' },
-                { id: ArcadeStorage.GAMES.SNAKE_POWERUP, name: '🐍 Snake (Power-Up)', icon: '🐍' },
-                { id: ArcadeStorage.GAMES.BREAKOUT, name: '🧱 Breakout', icon: '🧱' },
-                { id: ArcadeStorage.GAMES.FLAPPY, name: '🐦 Flappy Bird', icon: '🐦' },
-                { id: ArcadeStorage.GAMES.GAME2048, name: '🔢 2048', icon: '🔢' }
+                { mode: 'classic', name: 'Snake (Classic)', icon: '🐍' },
+                { mode: 'powerup', name: 'Snake (Power-Up)', icon: '🐍' },
+                { mode: 'breakout', name: 'Breakout', icon: '🧱' },
+                { mode: 'flappy', name: 'Flappy Bird', icon: '🐦' },
+                { mode: '2048', name: '2048', icon: '🔢' }
             ];
             
-            scoresGrid.innerHTML = games.map(game => {
-                const scores = ArcadeStorage.getAllScoresForGame(game.id);
-                const bestScoreEntry = scores.length > 0 ? scores[0] : null;
-                
+            // Initialize leaderboard if available
+            if (typeof Leaderboard !== 'undefined') {
+                Leaderboard.init();
+            }
+            
+            // Fetch global leaderboard for each game
+            const leaderboardPromises = games.map(async (game) => {
+                if (typeof Leaderboard !== 'undefined' && Leaderboard.isAvailable()) {
+                    try {
+                        const result = await Leaderboard.getLeaderboard(game.mode, 3);
+                        if (result.success && result.scores && result.scores.length > 0) {
+                            return {
+                                game: game,
+                                scores: result.scores
+                            };
+                        }
+                    } catch (error) {
+                        console.error(`Error loading leaderboard for ${game.name}:`, error);
+                    }
+                }
+                return {
+                    game: game,
+                    scores: []
+                };
+            });
+            
+            const leaderboardData = await Promise.all(leaderboardPromises);
+            
+            scoresGrid.innerHTML = leaderboardData.map(({ game, scores }) => {
                 return `
                     <div class="score-card">
-                        <h2>${game.icon} ${game.name.split(' ').slice(1).join(' ')}</h2>
-                        ${bestScoreEntry !== null ? `
-                            <div class="score-item score-item-best">
-                                <div class="score-item-left">
-                                    <span class="score-rank">🥇</span>
-                                    <span class="score-username">${bestScoreEntry.username || 'Player'}</span>
-                                </div>
-                                <span class="score-value">${bestScoreEntry.score || bestScoreEntry}</span>
-                            </div>
-                            ${scores.slice(1, 3).map((scoreEntry, index) => {
-                                const score = typeof scoreEntry === 'number' ? scoreEntry : scoreEntry.score;
-                                const username = typeof scoreEntry === 'number' ? 'Player' : (scoreEntry.username || 'Player');
-                                return `
-                                    <div class="score-item">
-                                        <div class="score-item-left">
-                                            <span class="score-rank">${index + 2}.</span>
-                                            <span class="score-username">${username}</span>
-                                        </div>
-                                        <span class="score-value">${score}</span>
+                        <h2>${game.icon} ${game.name}</h2>
+                        ${scores.length > 0 ? scores.map((entry, index) => {
+                            const rank = index + 1;
+                            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                            const isBest = rank === 1;
+                            return `
+                                <div class="score-item ${isBest ? 'score-item-best' : ''}">
+                                    <div class="score-item-left">
+                                        <span class="score-rank">${medal}</span>
+                                        <span class="score-username">${entry.name || 'Player'}</span>
                                     </div>
-                                `;
-                            }).join('')}
-                        ` : `
-                            <div class="no-scores">No scores yet!<br>Play to set your first record!</div>
+                                    <span class="score-value">${entry.score || 0}</span>
+                                </div>
+                            `;
+                        }).join('') : `
+                            <div class="no-scores">No scores yet!<br>Be the first to set a record!</div>
                         `}
                     </div>
                 `;

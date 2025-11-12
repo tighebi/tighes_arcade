@@ -93,12 +93,18 @@ const Game2048 = {
     
     applyTheme(theme) {
         const gameContainer = document.getElementById('game2048');
-        if (!gameContainer) return;
+        if (gameContainer) {
+            // Remove all theme classes from game container
+            gameContainer.classList.remove('theme-default', 'theme-dark', 'theme-colorful', 'theme-pastel');
+            // Add new theme class to game container
+            gameContainer.classList.add(`theme-${theme}`);
+        }
         
-        // Remove all theme classes
-        gameContainer.classList.remove('theme-default', 'theme-dark', 'theme-colorful', 'theme-pastel');
-        // Add new theme class
-        gameContainer.classList.add(`theme-${theme}`);
+        // Also apply theme to body for background animation
+        document.body.className = document.body.className.replace(/theme-\w+/g, '');
+        if (theme !== 'default') {
+            document.body.classList.add(`theme-${theme}`);
+        }
     },
     
     setupPauseMenu() {

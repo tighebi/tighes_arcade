@@ -197,9 +197,22 @@ const BreakoutGame = {
         const selector = document.getElementById('theme-selector');
         if (!selector) return;
         
+        // Apply initial theme
+        this.applyTheme(this.theme);
+        
         selector.addEventListener('change', (e) => {
             this.theme = e.target.value;
+            this.applyTheme(this.theme);
         });
+    },
+    
+    applyTheme(theme) {
+        // Remove all theme classes
+        document.body.className = document.body.className.replace(/theme-\w+/g, '');
+        // Add new theme class
+        if (theme !== 'default') {
+            document.body.classList.add(`theme-${theme}`);
+        }
     },
     
     setupPauseMenu() {

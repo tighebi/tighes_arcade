@@ -725,24 +725,61 @@ const FlappyGame = {
     },
     
     render() {
-        // Clear canvas with sky gradient
+        // Clear canvas with sky gradient - theme-based
         const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#4A90E2');
-        gradient.addColorStop(0.5, '#87CEEB');
-        gradient.addColorStop(1, '#B0E0E6');
+        
+        if (this.theme === 'night') {
+            // Night theme: dark blue to darker blue
+            gradient.addColorStop(0, '#1a1a3a');
+            gradient.addColorStop(0.5, '#0f0f2a');
+            gradient.addColorStop(1, '#0a0a1a');
+        } else if (this.theme === 'day') {
+            // Day theme: bright blue to light blue
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(0.5, '#B0E0E6');
+            gradient.addColorStop(1, '#E0F6FF');
+        } else {
+            // Default theme: medium blue gradient
+            gradient.addColorStop(0, '#4A90E2');
+            gradient.addColorStop(0.5, '#87CEEB');
+            gradient.addColorStop(1, '#B0E0E6');
+        }
+        
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw clouds
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        for (let i = 0; i < 3; i++) {
-            const cloudX = (this.frameCount * 0.2 + i * 200) % (this.canvas.width + 100) - 50;
-            const cloudY = 50 + i * 80;
-            this.ctx.beginPath();
-            this.ctx.arc(cloudX, cloudY, 20, 0, Math.PI * 2);
-            this.ctx.arc(cloudX + 25, cloudY, 25, 0, Math.PI * 2);
-            this.ctx.arc(cloudX + 50, cloudY, 20, 0, Math.PI * 2);
-            this.ctx.fill();
+        // Draw clouds (only for day/default themes, stars for night)
+        if (this.theme === 'night') {
+            // Draw stars for night theme
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            for (let i = 0; i < 20; i++) {
+                const starX = (i * 37 + this.frameCount * 0.1) % this.canvas.width;
+                const starY = (i * 23) % (this.canvas.height - 100);
+                this.ctx.beginPath();
+                this.ctx.arc(starX, starY, 1.5, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            // Draw a few brighter stars
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+            for (let i = 0; i < 5; i++) {
+                const starX = (i * 97 + this.frameCount * 0.05) % this.canvas.width;
+                const starY = (i * 67) % (this.canvas.height - 100);
+                this.ctx.beginPath();
+                this.ctx.arc(starX, starY, 2, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+        } else {
+            // Draw clouds for day/default themes
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            for (let i = 0; i < 3; i++) {
+                const cloudX = (this.frameCount * 0.2 + i * 200) % (this.canvas.width + 100) - 50;
+                const cloudY = 50 + i * 80;
+                this.ctx.beginPath();
+                this.ctx.arc(cloudX, cloudY, 20, 0, Math.PI * 2);
+                this.ctx.arc(cloudX + 25, cloudY, 25, 0, Math.PI * 2);
+                this.ctx.arc(cloudX + 50, cloudY, 20, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
         }
         
         // Draw pipes
