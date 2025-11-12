@@ -248,7 +248,7 @@ const PreviewGenerator = {
         
         // Draw info box
         const boxWidth = size * 0.85;
-        const boxHeight = size * 0.5;
+        const boxHeight = size * 0.4;
         const boxX = (size - boxWidth) / 2;
         const boxY = (size - boxHeight) / 2;
         
@@ -261,22 +261,17 @@ const PreviewGenerator = {
         ctx.lineWidth = 3;
         ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         
-        // Three sections
-        const sectionHeight = boxHeight / 3;
+        // Two sections (removed difficulty label section)
+        const sectionHeight = boxHeight / 2;
         const sectionY1 = boxY;
         const sectionY2 = boxY + sectionHeight;
-        const sectionY3 = boxY + sectionHeight * 2;
         
-        // Section dividers
+        // Section divider
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(boxX, sectionY2);
         ctx.lineTo(boxX + boxWidth, sectionY2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(boxX, sectionY3);
-        ctx.lineTo(boxX + boxWidth, sectionY3);
         ctx.stroke();
         
         // Text styling
@@ -290,10 +285,6 @@ const PreviewGenerator = {
         
         // Section 2: Lives
         ctx.fillText(`${diff.lives} Lives`, size / 2, sectionY2 + sectionHeight / 2);
-        
-        // Section 3: Difficulty label
-        ctx.fillStyle = diff.color;
-        ctx.fillText(diff.label, size / 2, sectionY3 + sectionHeight / 2);
     },
     
     // Generate preview for Flappy Bird difficulty
@@ -309,15 +300,23 @@ const PreviewGenerator = {
         
         const diff = difficulties[difficultyName] || difficulties.medium;
         
-        // Theme-based background colors (shades of current theme)
+        // Theme-based background colors (match current theme)
         const themeColors = {
-            day: { bg: '#B0E0E6', text: '#1a1a2e' }, // Light sky blue background
-            night: { bg: '#2a2a4a', text: '#fff' } // Dark blue background
+            day: { 
+                bg: '#87CEEB', // Sky blue to match day theme
+                box: '#B0E0E6', // Lighter sky blue for box
+                text: '#1a1a2e' // Dark text for readability
+            },
+            night: { 
+                bg: '#191970', // Midnight blue to match night theme
+                box: '#2a2a4a', // Darker blue for box
+                text: '#fff' // White text for readability
+            }
         };
         
         const themeColor = themeColors[currentTheme] || themeColors.day;
         
-        // Draw background with theme color
+        // Draw background with theme color (matches current theme)
         ctx.fillStyle = themeColor.bg;
         ctx.fillRect(0, 0, size, size);
         
@@ -327,8 +326,8 @@ const PreviewGenerator = {
         const boxX = (size - boxWidth) / 2;
         const boxY = (size - boxHeight) / 2;
         
-        // Box background (slightly darker shade)
-        ctx.fillStyle = currentTheme === 'day' ? '#87CEEB' : '#1a1a3a';
+        // Box background (slightly lighter/darker shade of theme)
+        ctx.fillStyle = themeColor.box;
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
         
         // Box border

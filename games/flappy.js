@@ -63,6 +63,20 @@ const FlappyGame = {
             document.getElementById('high-score').textContent = this.highScore;
         }
         
+        // Load saved theme (game-specific storage)
+        if (typeof Storage !== 'undefined' && Storage.loadGameTheme) {
+            const savedTheme = Storage.loadGameTheme('flappy');
+            if (savedTheme && (savedTheme === 'day' || savedTheme === 'night')) {
+                this.theme = savedTheme;
+            } else if (savedTheme === 'default') {
+                // Migrate old 'default' theme to 'day'
+                this.theme = 'day';
+                if (Storage.saveGameTheme) {
+                    Storage.saveGameTheme('flappy', 'day');
+                }
+            }
+        }
+        
         // Setup difficulty selector
         this.setupDifficulty();
         

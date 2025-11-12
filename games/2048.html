@@ -35,23 +35,7 @@
             height: 100% !important;
             z-index: 0 !important; /* Base layer - patterns should be visible */
             pointer-events: auto !important; /* Allow mouse tracking for parallax effect */
-            background: #0a0a1a !important; /* Base background color for patterns to show against */
-        }
-        /* Make all background layers 100% opaque */
-        #animated-bg .bg-layer {
-            opacity: 1 !important;
-        }
-        #animated-bg .bg-pattern-1 {
-            opacity: 1 !important;
-        }
-        #animated-bg .bg-pattern-2 {
-            opacity: 1 !important;
-        }
-        #animated-bg .bg-gradient {
-            opacity: 1 !important;
-        }
-        #animated-bg .bg-particles {
-            opacity: 1 !important;
+            background: #050510 !important; /* Darker base background */
         }
         .game-container {
             position: relative;
@@ -196,10 +180,10 @@
 </head>
 <body class="game-page">
     <div id="animated-bg">
-        <div class="bg-layer bg-particles"></div>
-        <div class="bg-layer bg-gradient"></div>
         <div class="bg-layer bg-pattern-1" id="pattern1"></div>
         <div class="bg-layer bg-pattern-2" id="pattern2"></div>
+        <div class="bg-layer bg-gradient"></div>
+        <div class="bg-layer bg-particles"></div>
         <div class="mouse-follower" id="mouseFollower"></div>
     </div>
     
@@ -315,11 +299,21 @@
     <script src="../shared/nav.js"></script>
     <script>
         // Initialize preview cards for 2048
+        // Optimized: Create cards once, reuse them
+        let cardsInitialized = false;
+        let outsideClickHandler = null;
+        
         function init2048PreviewCards() {
+            if (cardsInitialized) return; // Only initialize once
+            
             const game = window.game2048;
             if (!game) {
-                // Retry if game not ready
-                setTimeout(init2048PreviewCards, 100);
+                // Retry once if game not ready
+                setTimeout(() => {
+                    if (!cardsInitialized && window.game2048) {
+                        init2048PreviewCards();
+                    }
+                }, 100);
                 return;
             }
             
@@ -343,7 +337,7 @@
                 themeText.textContent = themeNames[currentTheme] || currentTheme;
             }
             
-            // Create theme cards immediately (like Snake game)
+            // Create theme cards once
             const themes = ['default', 'dark', 'colorful', 'pastel'];
             themes.forEach(theme => {
                 const card = document.createElement('div');
@@ -375,25 +369,38 @@
                 themeGrid.appendChild(card);
             });
             
-            // Toggle dropdown
+            // Toggle dropdown - single event listener
             themeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 themeGrid.classList.toggle('hidden');
                 themeBtn.classList.toggle('active');
             });
             
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!themeGrid.contains(e.target) && !themeBtn.contains(e.target)) {
-                    themeGrid.classList.add('hidden');
-                    themeBtn.classList.remove('active');
-                }
-            });
+            // Close dropdown when clicking outside - single handler, only add once
+            if (!outsideClickHandler) {
+                outsideClickHandler = (e) => {
+                    if (!themeGrid.contains(e.target) && !themeBtn.contains(e.target)) {
+                        themeGrid.classList.add('hidden');
+                        themeBtn.classList.remove('active');
+                    }
+                };
+                document.addEventListener('click', outsideClickHandler);
+            }
+            
+            cardsInitialized = true;
         }
         
-        window.addEventListener('load', () => {
-            setTimeout(init2048PreviewCards, 200);
-        });
+        // Wait for DOM and game to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init2048PreviewCards);
+        } else {
+            // DOM already loaded, wait for game
+            if (window.game2048) {
+                init2048PreviewCards();
+            } else {
+                window.addEventListener('load', init2048PreviewCards);
+            }
+        }
     </script>
 </body>
 </html>

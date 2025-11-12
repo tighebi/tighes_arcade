@@ -117,6 +117,14 @@ const BreakoutGame = {
             document.getElementById('high-score').textContent = this.highScore;
         }
         
+        // Load saved theme (game-specific storage)
+        if (typeof Storage !== 'undefined' && Storage.loadGameTheme) {
+            const savedTheme = Storage.loadGameTheme('breakout');
+            if (savedTheme && (savedTheme === 'default' || savedTheme === 'neon' || savedTheme === 'ocean' || savedTheme === 'sunset')) {
+                this.theme = savedTheme;
+            }
+        }
+        
         // Setup difficulty and theme selectors
         this.setupDifficulty();
         this.setupTheme();
@@ -196,6 +204,11 @@ const BreakoutGame = {
         // Add new theme class
         if (theme !== 'default') {
             document.body.classList.add(`theme-${theme}`);
+        }
+        
+        // Save theme to storage (game-specific storage)
+        if (typeof Storage !== 'undefined' && Storage.saveGameTheme) {
+            Storage.saveGameTheme('breakout', theme);
         }
     },
     

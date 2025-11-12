@@ -36,6 +36,14 @@ const Game2048 = {
             document.getElementById('high-score').textContent = this.highScore;
         }
         
+        // Load saved theme (game-specific storage)
+        if (typeof Storage !== 'undefined' && Storage.loadGameTheme) {
+            const savedTheme = Storage.loadGameTheme('2048');
+            if (savedTheme && (savedTheme === 'default' || savedTheme === 'dark' || savedTheme === 'colorful' || savedTheme === 'pastel')) {
+                this.theme = savedTheme;
+            }
+        }
+        
         // Setup theme selector
         this.setupTheme();
         
@@ -92,9 +100,16 @@ const Game2048 = {
         }
         
         // Apply theme to body for background animation and gradient (like Snake game)
+        // Remove all theme classes first
         document.body.className = document.body.className.replace(/theme-\w+/g, '');
+        // Add theme class (default theme has no specific CSS rules, so it uses base styles)
         if (theme !== 'default') {
             document.body.classList.add(`theme-${theme}`);
+        }
+        
+        // Save theme to storage (game-specific storage)
+        if (typeof Storage !== 'undefined' && Storage.saveGameTheme) {
+            Storage.saveGameTheme('2048', theme);
         }
         
         // Update theme selector button text

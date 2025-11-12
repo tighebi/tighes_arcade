@@ -202,40 +202,40 @@ body.theme-day .bg-pattern-1 {
             45deg,
             transparent,
             transparent 20px,
-            rgba(255, 215, 0, 0.03) 20px,
-            rgba(255, 215, 0, 0.03) 40px
+            rgba(135, 206, 235, 0.03) 20px,
+            rgba(135, 206, 235, 0.03) 40px
         ),
         repeating-linear-gradient(
             -45deg,
             transparent,
             transparent 20px,
-            rgba(255, 165, 0, 0.03) 20px,
-            rgba(255, 165, 0, 0.03) 40px
+            rgba(176, 224, 230, 0.03) 20px,
+            rgba(176, 224, 230, 0.03) 40px
         );
 }
 
 body.theme-day .bg-pattern-2 {
     background-image: 
-        radial-gradient(circle at 1px 1px, rgba(255, 215, 0, 0.15) 1px, transparent 0);
+        radial-gradient(circle at 1px 1px, rgba(135, 206, 235, 0.15) 1px, transparent 0);
 }
 
 body.theme-day .bg-gradient {
     background: linear-gradient(
         45deg,
-        rgba(255, 215, 0, 0.2) 0%,
-        rgba(255, 165, 0, 0.2) 25%,
-        rgba(255, 215, 0, 0.2) 50%,
-        rgba(255, 165, 0, 0.2) 75%,
-        rgba(255, 215, 0, 0.2) 100%
+        rgba(135, 206, 235, 0.2) 0%,
+        rgba(176, 224, 230, 0.2) 25%,
+        rgba(135, 206, 235, 0.2) 50%,
+        rgba(176, 224, 230, 0.2) 75%,
+        rgba(135, 206, 235, 0.2) 100%
     );
 }
 
 body.theme-day .bg-particles {
     background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.4) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(255, 165, 0, 0.4) 0%, transparent 40%),
-        radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.3) 0%, transparent 40%),
-        radial-gradient(circle at 60% 70%, rgba(255, 165, 0, 0.35) 0%, transparent 40%);
+        radial-gradient(circle at 20% 50%, rgba(135, 206, 235, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(176, 224, 230, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 40% 20%, rgba(135, 206, 235, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 60% 70%, rgba(176, 224, 230, 0.35) 0%, transparent 40%);
 }
 
 body.theme-space .bg-pattern-1 {

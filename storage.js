@@ -67,6 +67,23 @@ const Storage = {
         localStorage.setItem('snakeTheme', theme);
     },
     
+    // Game-specific theme storage
+    loadGameTheme(gameName) {
+        const key = `${gameName}Theme`;
+        const defaultThemes = {
+            'snake': 'default',
+            'breakout': 'default',
+            'flappy': 'day',
+            '2048': 'default'
+        };
+        return localStorage.getItem(key) || defaultThemes[gameName] || 'default';
+    },
+    
+    saveGameTheme(gameName, theme) {
+        const key = `${gameName}Theme`;
+        localStorage.setItem(key, theme);
+    },
+    
     // Update high scores (adds new score if high enough, keeps top 10)
     // Also saves to ArcadeStorage if available
     updateHighScores(newScore, isPowerUp = false) {

@@ -179,13 +179,13 @@
                         game.theme = theme;
                         game.applyTheme(theme);
                         if (themeText) themeText.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
-                        try {
-                            if (typeof Storage !== 'undefined' && Storage.saveTheme) {
-                                Storage.saveTheme(theme);
-                            }
-                        } catch (e) {
-                            console.log('Storage not available for theme');
-                        }
+                                try {
+                                    if (typeof Storage !== 'undefined' && Storage.saveGameTheme) {
+                                        Storage.saveGameTheme('flappy', theme);
+                                    }
+                                } catch (e) {
+                                    console.log('Storage not available for theme');
+                                }
                         themeGrid.classList.add('hidden');
                         themeBtn.classList.remove('active');
                     });
@@ -220,12 +220,7 @@
                     canvas.height = 200;
                     PreviewGenerator.generateFlappyDifficultyPreview(diff, canvas, currentTheme);
                     
-                    const label = document.createElement('div');
-                    label.className = 'preview-card-label';
-                    label.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
-                    
                     card.appendChild(canvas);
-                    card.appendChild(label);
                     card.addEventListener('click', (e) => {
                         e.stopPropagation();
                         document.querySelectorAll('#difficulty-preview-grid .preview-card').forEach(c => c.classList.remove('selected'));
