@@ -464,41 +464,6 @@ The arcade is designed to work with:
 * Supabase's free tier is sufficient for most use cases
 * See `LEADERBOARD_SETUP.md` for setup instructions
 
-## Tips & Strategies
-
-### Snake
-
-* **Classic Mode** - Plan your path and use the walls to your advantage
-* **Zen Mode** - Experiment with different movement patterns
-* **Power-Up Mode** - Save Blue Potions for difficult situations and use Red Potions when there is enough space
-
-### Breakout
-
-* **Easy** - Useful for learning the game, with a larger paddle and three lives
-* **Medium** - Balanced difficulty with two lives
-* **Hard** - Faster gameplay with one life
-* Aim toward the corners to create more bounces
-* Pay attention to the increasing ball speed
-* The game starts when you move the paddle
-* Losing a life does not produce a popup; the popup appears only when all lives are lost
-
-### Flappy Bird
-
-* The game starts with larger gaps and thinner pipes
-* Difficulty changes the bird's initial speed
-* Time your taps based on the bird's movement
-* Focus on the gap between the pipes
-* The speed increases as the game progresses
-* Use the easier beginning of the game to build a score
-* The bird starts in the center of the screen
-
-### 2048
-
-* Keep the highest tile in a corner
-* Try to build tiles in one direction
-* Plan moves before making them
-* Pay attention to where new tiles appear
-
 ## Changelog
 
 ### Version 4.0 (Current) - Global Leaderboard and Game Updates
